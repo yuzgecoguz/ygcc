@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v1.0.0-blue)](https://www.npmjs.com/package/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v1.1.0-blue)](https://www.npmjs.com/package/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-82%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-165%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -32,7 +32,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | # | Exchange | ID | REST | WebSocket | Status |
 |---|----------|-----|------|-----------|--------|
 | 1 | [Binance](https://www.binance.com) | `binance` | ✅ | ✅ | **Ready** |
-| 2 | [Bybit](https://www.bybit.com) | `bybit` | 🔜 | 🔜 | Planned |
+| 2 | [Bybit](https://www.bybit.com) | `bybit` | ✅ | ✅ | **Ready** |
 | 3 | [OKX](https://www.okx.com) | `okx` | 🔜 | 🔜 | Planned |
 | 4 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
 | 5 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
@@ -179,13 +179,64 @@ process.on('SIGINT', async () => {
 });
 ```
 
+### Using Bybit
+
+```javascript
+const { Bybit } = require('ygcc');
+
+const exchange = new Bybit();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  const ticker = await exchange.fetchTicker('BTCUSDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTCUSDT', 50);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### Bybit Trading (Private)
+
+```javascript
+const { Bybit } = require('ygcc');
+
+const exchange = new Bybit({
+  apiKey: process.env.BYBIT_API_KEY,
+  secret: process.env.BYBIT_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // Bybit V5 uses POST for orders (not query string like Binance)
+  const order = await exchange.createLimitOrder('BTCUSDT', 'Buy', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  // Cancel uses POST too (not DELETE like Binance)
+  const canceled = await exchange.cancelOrder(order.id, 'BTCUSDT');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
-const exchange = new Binance({
+// Binance testnet
+const binance = new Binance({
   apiKey: 'testnet-key',
   secret: 'testnet-secret',
   options: { sandbox: true }, // Uses testnet.binance.vision
+});
+
+// Bybit testnet
+const bybit = new Bybit({
+  apiKey: 'testnet-key',
+  secret: 'testnet-secret',
+  options: { sandbox: true }, // Uses api-testnet.bybit.com
 });
 ```
 
@@ -195,56 +246,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance |
-|--------|-------------|---------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ |
+| Method | Description | Binance | Bybit |
+|--------|-------------|---------|-------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | |
+| `fetchTime()` | Server time | | ✅ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance |
-|--------|-------------|---------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ |
-| `createOTO(...)` | One-Triggers-Other | ✅ |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ |
-| `amendOrder(id, symbol, newQty)` | Modify order quantity | ✅ |
-| `testOrder(...)` | Validate without placing | ✅ |
+| Method | Description | Binance | Bybit |
+|--------|-------------|---------|-------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | |
+| `testOrder(...)` | Validate without placing | ✅ | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance |
-|--------|-------------|---------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ |
-| `fetchAllOrders(symbol, ...)` | Order history | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ |
+| Method | Description | Binance | Bybit |
+|--------|-------------|---------|-------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance |
-|--------|-------------|---------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ |
-| `watchBalance(callback)` | Balance updates (User Data) | ✅ |
-| `watchOrders(callback)` | Order updates (User Data) | ✅ |
+| Method | Description | Binance | Bybit |
+|--------|-------------|---------|-------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ |
 
 ## Unified Response Formats
 
@@ -379,10 +432,11 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance } = require('ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit } = require('ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
+│   ├── bybit.js                # Bybit V5 implementation (1021 lines, 45 methods)
 │   └── utils/
 │       ├── crypto.js           # HMAC-SHA256 signing
 │       ├── errors.js           # Typed error classes
@@ -394,7 +448,8 @@ ygcc/
 │   ├── place-order.js          # Trading demo
 │   └── websocket-stream.js     # Real-time streaming demo
 └── tests/
-    └── binance.test.js         # 82 tests
+    ├── binance.test.js         # 82 tests — Binance implementation
+    └── bybit.test.js           # Bybit V5 implementation tests
 ```
 
 ## Adding a New Exchange
@@ -447,14 +502,26 @@ npm test
 ▶ Throttler (5 tests)
 ▶ Error Classes (4 tests)
 ▶ Binance market() lookup (3 tests)
+▶ Module Exports — Bybit (3 tests)
+▶ Bybit Constructor (10 tests)
+▶ Bybit Authentication (6 tests)
+▶ Bybit Response Unwrapping (4 tests)
+▶ Bybit Parsers (10 tests)
+▶ Bybit Helper Methods (3 tests)
+▶ Bybit Error Mapping (13 tests)
+▶ Bybit HTTP Error Handling (5 tests)
+▶ Bybit Rate Limit Header Handling (3 tests)
+▶ Bybit API Methods — mocked (20 tests)
+▶ Bybit market() lookup (3 tests)
+▶ Bybit vs Binance Differences (5 tests)
 
-82 passing — 250ms
+165 passing — 243ms
 ```
 
 ## Roadmap
 
 - [x] Binance Spot — Full REST + WebSocket (59 methods)
-- [ ] Bybit — V5 Unified API
+- [x] Bybit V5 — Full REST + WebSocket (45 methods)
 - [ ] OKX — REST + WebSocket
 - [ ] Gate.io — Spot + Futures
 - [ ] KuCoin — REST + WebSocket

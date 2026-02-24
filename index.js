@@ -1,6 +1,7 @@
 'use strict';
 
 const Binance = require('./lib/binance');
+const Bybit = require('./lib/bybit');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -15,6 +16,8 @@ module.exports = {
   // Exchanges
   Binance,
   binance: Binance, // lowercase alias (CCXT-style)
+  Bybit,
+  bybit: Bybit,     // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -28,8 +31,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance'],
+  exchanges: ['binance', 'bybit'],
 
   // Version
-  version: '1.0.0',
+  version: '1.1.0',
 };
