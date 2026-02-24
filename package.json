@@ -1,0 +1,46 @@
+{
+  "name": "ygcc",
+  "version": "1.0.0",
+  "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 40+ exchanges",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuzgecoguz/ygcc.git"
+  },
+  "keywords": [
+    "cryptocurrency",
+    "exchange",
+    "trading",
+    "binance",
+    "bybit",
+    "okx",
+    "bitcoin",
+    "ethereum",
+    "websocket",
+    "rest-api",
+    "market-data",
+    "order-book",
+    "ticker",
+    "ohlcv",
+    "candlestick",
+    "unified-api",
+    "algorithmic-trading",
+    "crypto",
+    "defi"
+  ],
+  "author": "Oguzhan Yuzgec <breath6767@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuzgecoguz/ygcc/issues"
+  },
+  "homepage": "https://github.com/yuzgecoguz/ygcc#readme",
+  "dependencies": {
+    "ws": "^8.16.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
