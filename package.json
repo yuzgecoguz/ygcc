@@ -3,6 +3,12 @@
   "version": "1.1.0",
   "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 40+ exchanges",
   "main": "index.js",
+  "files": [
+    "lib/",
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "node --test tests/*.test.js"
   },

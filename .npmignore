@@ -1,0 +1,8 @@
+tests/
+examples/
+exchanges/
+.github/
+.env
+*.log
+.DS_Store
+.claude/
