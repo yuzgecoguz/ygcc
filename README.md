@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v1.3.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v1.4.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-342%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-426%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **HMAC-SHA256/512 Authentication** — Secure request signing (hex for Binance/Bybit, Base64 for OKX, SHA512 for Kraken)
+- **HMAC-SHA256/512 Authentication** — Secure request signing (hex for Binance/Bybit, Base64 for OKX, SHA512 for Kraken/Gate.io)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -35,9 +35,9 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 2 | [Bybit](https://www.bybit.com) | `bybit` | ✅ | ✅ | **Ready** |
 | 3 | [OKX](https://www.okx.com) | `okx` | ✅ | ✅ | **Ready** |
 | 4 | [Kraken](https://www.kraken.com) | `kraken` | ✅ | ✅ | **Ready** |
-| 5 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
-| 6 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
-| 7 | [Gate.io](https://www.gate.io) | `gateio` | 🔜 | 🔜 | Planned |
+| 5 | [Gate.io](https://www.gate.io) | `gateio` | ✅ | ✅ | **Ready** |
+| 6 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
+| 7 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
 | 8 | [Bitfinex](https://www.bitfinex.com) | `bitfinex` | 🔜 | 🔜 | Planned |
 | 9 | [Bitstamp](https://www.bitstamp.net) | `bitstamp` | 🔜 | 🔜 | Planned |
 | 10 | [Gemini](https://www.gemini.com) | `gemini` | 🔜 | 🔜 | Planned |
@@ -310,6 +310,49 @@ const exchange = new Kraken({
 })();
 ```
 
+### Using Gate.io
+
+```javascript
+const { Gateio } = require('@ygcc/ygcc');
+
+const exchange = new Gateio();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // Gate.io uses underscore-separated symbols: BTC_USDT
+  const ticker = await exchange.fetchTicker('BTC/USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USDT', 10);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### Gate.io Trading (Private)
+
+```javascript
+const { Gateio } = require('@ygcc/ygcc');
+
+const exchange = new Gateio({
+  apiKey: process.env.GATEIO_API_KEY,
+  secret: process.env.GATEIO_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // Gate.io uses HMAC-SHA512 hex signing with SHA512 body hash
+  const order = await exchange.createLimitOrder('BTC/USDT', 'buy', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/USDT');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -342,58 +385,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit | OKX | Kraken |
-|--------|-------------|---------|-------|-----|--------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | |
-| `fetchTime()` | Server time | | ✅ | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io |
+|--------|-------------|---------|-------|-----|--------|---------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | |
+| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken |
-|--------|-------------|---------|-------|-----|--------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | | | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | |
-| `testOrder(...)` | Validate without placing | ✅ | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io |
+|--------|-------------|---------|-------|-----|--------|---------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | |
+| `testOrder(...)` | Validate without placing | ✅ | | | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken |
-|--------|-------------|---------|-------|-----|--------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io |
+|--------|-------------|---------|-------|-----|--------|---------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit | OKX | Kraken |
-|--------|-------------|---------|-------|-----|--------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io |
+|--------|-------------|---------|-------|-----|--------|---------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ## Unified Response Formats
 
@@ -528,15 +571,16 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
 │   ├── bybit.js                # Bybit V5 implementation (1021 lines, 45 methods)
 │   ├── okx.js                  # OKX V5 implementation (690 lines, 42 methods)
 │   ├── kraken.js               # Kraken implementation (680 lines, 40 methods)
+│   ├── gateio.js               # Gate.io V4 implementation (700 lines, 40 methods)
 │   └── utils/
-│       ├── crypto.js           # HMAC-SHA256/512 signing (hex + Base64)
+│       ├── crypto.js           # HMAC-SHA256/512 signing (hex + Base64 + SHA512)
 │       ├── errors.js           # Typed error classes
 │       ├── helpers.js          # Safe value extraction, query builders
 │       ├── throttler.js        # Token-bucket rate limiter
@@ -549,7 +593,8 @@ ygcc/
     ├── binance.test.js         # 82 tests — Binance implementation
     ├── bybit.test.js           # 83 tests — Bybit V5 implementation
     ├── okx.test.js             # 91 tests — OKX V5 implementation
-    └── kraken.test.js          # 90 tests — Kraken implementation
+    ├── kraken.test.js          # 86 tests — Kraken implementation
+    └── gateio.test.js          # 84 tests — Gate.io V4 implementation
 ```
 
 ## Adding a New Exchange
@@ -640,8 +685,21 @@ npm test
 ▶ Kraken Market Lookup (3 tests)
 ▶ Kraken vs Other Exchanges (7 tests)
 ▶ Crypto — krakenSign (3 tests)
+▶ Module Exports — Gate.io (3 tests)
+▶ Gateio Constructor (10 tests)
+▶ Gate.io Authentication (8 tests)
+▶ Gate.io Response Handling (4 tests)
+▶ Gate.io Parsers (9 tests)
+▶ Gate.io Helper Methods (4 tests)
+▶ Gate.io Error Mapping (10 tests)
+▶ Gate.io HTTP Error Handling (5 tests)
+▶ Gate.io Rate Limit Headers (3 tests)
+▶ Gate.io Mocked API Calls (17 tests)
+▶ Gate.io Market Lookup (3 tests)
+▶ Gate.io vs Others Differences (5 tests)
+▶ Crypto — sha512 & hmacSHA512Hex (3 tests)
 
-342 passing
+426 passing
 ```
 
 ## Roadmap
@@ -650,7 +708,7 @@ npm test
 - [x] Bybit V5 — Full REST + WebSocket (45 methods)
 - [x] OKX V5 — Full REST + WebSocket (42 methods)
 - [x] Kraken — Full REST + WebSocket V2 (40 methods)
-- [ ] Gate.io — Spot + Futures
+- [x] Gate.io V4 — Full REST + WebSocket (40 methods)
 - [ ] KuCoin — REST + WebSocket
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
