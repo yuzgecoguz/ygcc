@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v1.2.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v1.3.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-256%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-342%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **HMAC-SHA256 Authentication** — Secure request signing (hex for Binance/Bybit, Base64 for OKX)
+- **HMAC-SHA256/512 Authentication** — Secure request signing (hex for Binance/Bybit, Base64 for OKX, SHA512 for Kraken)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -34,43 +34,44 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 1 | [Binance](https://www.binance.com) | `binance` | ✅ | ✅ | **Ready** |
 | 2 | [Bybit](https://www.bybit.com) | `bybit` | ✅ | ✅ | **Ready** |
 | 3 | [OKX](https://www.okx.com) | `okx` | ✅ | ✅ | **Ready** |
-| 4 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
-| 5 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
-| 6 | [Gate.io](https://www.gate.io) | `gateio` | 🔜 | 🔜 | Planned |
-| 7 | [Bitfinex](https://www.bitfinex.com) | `bitfinex` | 🔜 | 🔜 | Planned |
-| 8 | [Bitstamp](https://www.bitstamp.net) | `bitstamp` | 🔜 | 🔜 | Planned |
-| 9 | [Gemini](https://www.gemini.com) | `gemini` | 🔜 | 🔜 | Planned |
-| 10 | [Crypto.com](https://crypto.com) | `cryptocom` | 🔜 | 🔜 | Planned |
-| 11 | [Bittrex](https://bittrex.com) | `bittrex` | 🔜 | 🔜 | Planned |
-| 12 | [Bitrue](https://www.bitrue.com) | `bitrue` | 🔜 | 🔜 | Planned |
-| 13 | [LBANK](https://www.lbank.com) | `lbank` | 🔜 | 🔜 | Planned |
-| 14 | [BitMart](https://www.bitmart.com) | `bitmart` | 🔜 | 🔜 | Planned |
-| 15 | [Bitforex](https://www.bitforex.com) | `bitforex` | 🔜 | 🔜 | Planned |
-| 16 | [Phemex](https://phemex.com) | `phemex` | 🔜 | 🔜 | Planned |
-| 17 | [Pionex](https://www.pionex.com) | `pionex` | 🔜 | 🔜 | Planned |
-| 18 | [Bibox](https://www.bibox.com) | `bibox` | 🔜 | 🔜 | Planned |
-| 19 | [Bitexen](https://www.bitexen.com) | `bitexen` | 🔜 | 🔜 | Planned |
-| 20 | [VALR](https://www.valr.com) | `valr` | 🔜 | 🔜 | Planned |
-| 21 | [WhiteBit](https://whitebit.com) | `whitebit` | 🔜 | 🔜 | Planned |
-| 22 | [BtcTurk](https://www.btcturk.com) | `btcturk` | 🔜 | 🔜 | Planned |
-| 23 | [BTSE](https://www.btse.com) | `btse` | 🔜 | 🔜 | Planned |
-| 24 | [EXMO](https://exmo.com) | `exmo` | 🔜 | 🔜 | Planned |
-| 25 | [CoinTR](https://www.cointr.com) | `cointr` | 🔜 | 🔜 | Planned |
-| 26 | [Coinzix](https://coinzix.com) | `coinzix` | 🔜 | 🔜 | Planned |
-| 27 | [DigiFinex](https://www.digifinex.com) | `digifinex` | 🔜 | 🔜 | Planned |
-| 28 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | 🔜 | 🔜 | Planned |
-| 29 | [iCrypex](https://icrypex.com) | `icrypex` | 🔜 | 🔜 | Planned |
-| 30 | [JBEX](https://www.jbex.com) | `jbex` | 🔜 | 🔜 | Planned |
-| 31 | [Kuna](https://kuna.io) | `kuna` | 🔜 | 🔜 | Planned |
-| 32 | [Narkasa](https://www.narkasa.com) | `narkasa` | 🔜 | 🔜 | Planned |
-| 33 | [NovaDax](https://www.novadax.com) | `novadax` | 🔜 | 🔜 | Planned |
-| 34 | [PointPay](https://pointpay.io) | `pointpay` | 🔜 | 🔜 | Planned |
-| 35 | [QMall](https://qmall.io) | `qmall` | 🔜 | 🔜 | Planned |
-| 36 | [TruBit](https://www.trubit.com) | `trubit` | 🔜 | 🔜 | Planned |
-| 37 | [TradeOgre](https://tradeogre.com) | `tradeogre` | 🔜 | 🔜 | Planned |
-| 38 | [TIDEX](https://tidex.com) | `tidex` | 🔜 | 🔜 | Planned |
-| 39 | [Latoken](https://latoken.com) | `latoken` | 🔜 | 🔜 | Planned |
-| 40 | [Polymarket](https://polymarket.com) | `polymarket` | 🔜 | 🔜 | Planned |
+| 4 | [Kraken](https://www.kraken.com) | `kraken` | ✅ | ✅ | **Ready** |
+| 5 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
+| 6 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
+| 7 | [Gate.io](https://www.gate.io) | `gateio` | 🔜 | 🔜 | Planned |
+| 8 | [Bitfinex](https://www.bitfinex.com) | `bitfinex` | 🔜 | 🔜 | Planned |
+| 9 | [Bitstamp](https://www.bitstamp.net) | `bitstamp` | 🔜 | 🔜 | Planned |
+| 10 | [Gemini](https://www.gemini.com) | `gemini` | 🔜 | 🔜 | Planned |
+| 11 | [Crypto.com](https://crypto.com) | `cryptocom` | 🔜 | 🔜 | Planned |
+| 12 | [Bittrex](https://bittrex.com) | `bittrex` | 🔜 | 🔜 | Planned |
+| 13 | [Bitrue](https://www.bitrue.com) | `bitrue` | 🔜 | 🔜 | Planned |
+| 14 | [LBANK](https://www.lbank.com) | `lbank` | 🔜 | 🔜 | Planned |
+| 15 | [BitMart](https://www.bitmart.com) | `bitmart` | 🔜 | 🔜 | Planned |
+| 16 | [Bitforex](https://www.bitforex.com) | `bitforex` | 🔜 | 🔜 | Planned |
+| 17 | [Phemex](https://phemex.com) | `phemex` | 🔜 | 🔜 | Planned |
+| 18 | [Pionex](https://www.pionex.com) | `pionex` | 🔜 | 🔜 | Planned |
+| 19 | [Bibox](https://www.bibox.com) | `bibox` | 🔜 | 🔜 | Planned |
+| 20 | [Bitexen](https://www.bitexen.com) | `bitexen` | 🔜 | 🔜 | Planned |
+| 21 | [VALR](https://www.valr.com) | `valr` | 🔜 | 🔜 | Planned |
+| 22 | [WhiteBit](https://whitebit.com) | `whitebit` | 🔜 | 🔜 | Planned |
+| 23 | [BtcTurk](https://www.btcturk.com) | `btcturk` | 🔜 | 🔜 | Planned |
+| 24 | [BTSE](https://www.btse.com) | `btse` | 🔜 | 🔜 | Planned |
+| 25 | [EXMO](https://exmo.com) | `exmo` | 🔜 | 🔜 | Planned |
+| 26 | [CoinTR](https://www.cointr.com) | `cointr` | 🔜 | 🔜 | Planned |
+| 27 | [Coinzix](https://coinzix.com) | `coinzix` | 🔜 | 🔜 | Planned |
+| 28 | [DigiFinex](https://www.digifinex.com) | `digifinex` | 🔜 | 🔜 | Planned |
+| 29 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | 🔜 | 🔜 | Planned |
+| 30 | [iCrypex](https://icrypex.com) | `icrypex` | 🔜 | 🔜 | Planned |
+| 31 | [JBEX](https://www.jbex.com) | `jbex` | 🔜 | 🔜 | Planned |
+| 32 | [Kuna](https://kuna.io) | `kuna` | 🔜 | 🔜 | Planned |
+| 33 | [Narkasa](https://www.narkasa.com) | `narkasa` | 🔜 | 🔜 | Planned |
+| 34 | [NovaDax](https://www.novadax.com) | `novadax` | 🔜 | 🔜 | Planned |
+| 35 | [PointPay](https://pointpay.io) | `pointpay` | 🔜 | 🔜 | Planned |
+| 36 | [QMall](https://qmall.io) | `qmall` | 🔜 | 🔜 | Planned |
+| 37 | [TruBit](https://www.trubit.com) | `trubit` | 🔜 | 🔜 | Planned |
+| 38 | [TradeOgre](https://tradeogre.com) | `tradeogre` | 🔜 | 🔜 | Planned |
+| 39 | [TIDEX](https://tidex.com) | `tidex` | 🔜 | 🔜 | Planned |
+| 40 | [Latoken](https://latoken.com) | `latoken` | 🔜 | 🔜 | Planned |
+| 41 | [Polymarket](https://polymarket.com) | `polymarket` | 🔜 | 🔜 | Planned |
 
 ### DEX (Decentralized)
 
@@ -266,6 +267,49 @@ const exchange = new Okx({
 })();
 ```
 
+### Using Kraken
+
+```javascript
+const { Kraken } = require('@ygcc/ygcc');
+
+const exchange = new Kraken();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // Kraken uses slash-separated symbols: BTC/USD
+  const ticker = await exchange.fetchTicker('BTC/USD');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USD', 10);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### Kraken Trading (Private)
+
+```javascript
+const { Kraken } = require('@ygcc/ygcc');
+
+const exchange = new Kraken({
+  apiKey: process.env.KRAKEN_API_KEY,
+  secret: process.env.KRAKEN_SECRET, // Base64-encoded secret
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USD:', balance.USD);
+
+  // Kraken uses form-urlencoded POST, SHA256+HMAC-SHA512 signing
+  const order = await exchange.createLimitOrder('BTC/USD', 'buy', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  const canceled = await exchange.cancelOrder(order.id);
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -298,58 +342,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit | OKX |
-|--------|-------------|---------|-------|-----|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | |
-| `fetchTime()` | Server time | | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX | Kraken |
+|--------|-------------|---------|-------|-----|--------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | |
+| `fetchTime()` | Server time | | ✅ | ✅ | ✅ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX |
-|--------|-------------|---------|-------|-----|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | |
-| `testOrder(...)` | Validate without placing | ✅ | | |
+| Method | Description | Binance | Bybit | OKX | Kraken |
+|--------|-------------|---------|-------|-----|--------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | |
+| `testOrder(...)` | Validate without placing | ✅ | | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX |
-|--------|-------------|---------|-------|-----|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | |
+| Method | Description | Binance | Bybit | OKX | Kraken |
+|--------|-------------|---------|-------|-----|--------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit | OKX |
-|--------|-------------|---------|-------|-----|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX | Kraken |
+|--------|-------------|---------|-------|-----|--------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ |
 
 ## Unified Response Formats
 
@@ -484,14 +528,15 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
 │   ├── bybit.js                # Bybit V5 implementation (1021 lines, 45 methods)
 │   ├── okx.js                  # OKX V5 implementation (690 lines, 42 methods)
+│   ├── kraken.js               # Kraken implementation (680 lines, 40 methods)
 │   └── utils/
-│       ├── crypto.js           # HMAC-SHA256 signing (hex + Base64)
+│       ├── crypto.js           # HMAC-SHA256/512 signing (hex + Base64)
 │       ├── errors.js           # Typed error classes
 │       ├── helpers.js          # Safe value extraction, query builders
 │       ├── throttler.js        # Token-bucket rate limiter
@@ -503,7 +548,8 @@ ygcc/
 └── tests/
     ├── binance.test.js         # 82 tests — Binance implementation
     ├── bybit.test.js           # 83 tests — Bybit V5 implementation
-    └── okx.test.js             # 91 tests — OKX V5 implementation
+    ├── okx.test.js             # 91 tests — OKX V5 implementation
+    └── kraken.test.js          # 90 tests — Kraken implementation
 ```
 
 ## Adding a New Exchange
@@ -581,8 +627,21 @@ npm test
 ▶ OKX market() lookup (3 tests)
 ▶ OKX vs Binance/Bybit Differences (7 tests)
 ▶ Crypto — hmacSHA256Base64 (2 tests)
+▶ Module Exports — Kraken (3 tests)
+▶ Kraken Constructor (10 tests)
+▶ Kraken Authentication (8 tests)
+▶ Kraken Response Unwrapping (4 tests)
+▶ Kraken Parsers (10 tests)
+▶ Kraken Helper Methods (4 tests)
+▶ Kraken Error Mapping (12 tests)
+▶ Kraken HTTP Error Handling (5 tests)
+▶ Kraken Rate Limit Headers (3 tests)
+▶ Kraken Mocked API Calls (20 tests)
+▶ Kraken Market Lookup (3 tests)
+▶ Kraken vs Other Exchanges (7 tests)
+▶ Crypto — krakenSign (3 tests)
 
-256 passing — 253ms
+342 passing
 ```
 
 ## Roadmap
@@ -590,6 +649,7 @@ npm test
 - [x] Binance Spot — Full REST + WebSocket (59 methods)
 - [x] Bybit V5 — Full REST + WebSocket (45 methods)
 - [x] OKX V5 — Full REST + WebSocket (42 methods)
+- [x] Kraken — Full REST + WebSocket V2 (40 methods)
 - [ ] Gate.io — Spot + Futures
 - [ ] KuCoin — REST + WebSocket
 - [ ] Futures/Margin support (Binance USDM, COINM)
