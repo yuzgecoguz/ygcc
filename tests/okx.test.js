@@ -26,8 +26,8 @@ describe('Module Exports — OKX', () => {
     assert.ok(ygcc.exchanges.includes('okx'));
   });
 
-  it('version is 1.4.0', () => {
-    assert.strictEqual(ygcc.version, '1.4.0');
+  it('version is 1.5.0', () => {
+    assert.strictEqual(ygcc.version, '1.5.0');
   });
 });
 

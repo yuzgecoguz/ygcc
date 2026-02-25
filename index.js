@@ -5,6 +5,7 @@ const Bybit = require('./lib/bybit');
 const Okx = require('./lib/okx');
 const Kraken = require('./lib/kraken');
 const Gateio = require('./lib/gateio');
+const KuCoin = require('./lib/kucoin');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -27,6 +28,8 @@ module.exports = {
   kraken: Kraken,   // lowercase alias (CCXT-style)
   Gateio,
   gateio: Gateio,   // lowercase alias (CCXT-style)
+  KuCoin,
+  kucoin: KuCoin,   // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -44,8 +47,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin'],
 
   // Version
-  version: '1.4.0',
+  version: '1.5.0',
 };
