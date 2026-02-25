@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v1.1.0-blue)](https://www.npmjs.com/package/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v1.2.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-165%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-256%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **HMAC-SHA256 Authentication** — Secure request signing with timestamp synchronization
+- **HMAC-SHA256 Authentication** — Secure request signing (hex for Binance/Bybit, Base64 for OKX)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -33,7 +33,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 |---|----------|-----|------|-----------|--------|
 | 1 | [Binance](https://www.binance.com) | `binance` | ✅ | ✅ | **Ready** |
 | 2 | [Bybit](https://www.bybit.com) | `bybit` | ✅ | ✅ | **Ready** |
-| 3 | [OKX](https://www.okx.com) | `okx` | 🔜 | 🔜 | Planned |
+| 3 | [OKX](https://www.okx.com) | `okx` | ✅ | ✅ | **Ready** |
 | 4 | [Coinbase](https://www.coinbase.com) | `coinbase` | 🔜 | 🔜 | Planned |
 | 5 | [KuCoin](https://www.kucoin.com) | `kucoin` | 🔜 | 🔜 | Planned |
 | 6 | [Gate.io](https://www.gate.io) | `gateio` | 🔜 | 🔜 | Planned |
@@ -84,7 +84,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 ## Installation
 
 ```bash
-npm install ygcc
+npm install @ygcc/ygcc
 ```
 
 Or clone directly:
@@ -100,7 +100,7 @@ npm install
 ### Fetch Market Data (Public — No API Key Needed)
 
 ```javascript
-const { Binance } = require('ygcc');
+const { Binance } = require('@ygcc/ygcc');
 
 const exchange = new Binance();
 
@@ -126,7 +126,7 @@ const exchange = new Binance();
 ### Place Orders (Private — API Key Required)
 
 ```javascript
-const { Binance } = require('ygcc');
+const { Binance } = require('@ygcc/ygcc');
 
 const exchange = new Binance({
   apiKey: process.env.BINANCE_API_KEY,
@@ -152,7 +152,7 @@ const exchange = new Binance({
 ### WebSocket Streaming (Real-Time)
 
 ```javascript
-const { Binance } = require('ygcc');
+const { Binance } = require('@ygcc/ygcc');
 
 const exchange = new Binance();
 
@@ -182,7 +182,7 @@ process.on('SIGINT', async () => {
 ### Using Bybit
 
 ```javascript
-const { Bybit } = require('ygcc');
+const { Bybit } = require('@ygcc/ygcc');
 
 const exchange = new Bybit();
 
@@ -201,7 +201,7 @@ const exchange = new Bybit();
 ### Bybit Trading (Private)
 
 ```javascript
-const { Bybit } = require('ygcc');
+const { Bybit } = require('@ygcc/ygcc');
 
 const exchange = new Bybit({
   apiKey: process.env.BYBIT_API_KEY,
@@ -222,6 +222,50 @@ const exchange = new Bybit({
 })();
 ```
 
+### Using OKX
+
+```javascript
+const { Okx } = require('@ygcc/ygcc');
+
+const exchange = new Okx();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // OKX uses dash-separated symbols: BTC-USDT (not BTCUSDT)
+  const ticker = await exchange.fetchTicker('BTC-USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC-USDT', 5);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### OKX Trading (Private)
+
+```javascript
+const { Okx } = require('@ygcc/ygcc');
+
+const exchange = new Okx({
+  apiKey: process.env.OKX_API_KEY,
+  secret: process.env.OKX_SECRET,
+  passphrase: process.env.OKX_PASSPHRASE, // OKX requires passphrase!
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // OKX uses lowercase side/type, Base64 signature, POST for all trades
+  const order = await exchange.createLimitOrder('BTC-USDT', 'buy', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  const canceled = await exchange.cancelOrder(order.id, 'BTC-USDT');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -238,6 +282,14 @@ const bybit = new Bybit({
   secret: 'testnet-secret',
   options: { sandbox: true }, // Uses api-testnet.bybit.com
 });
+
+// OKX demo trading
+const okx = new Okx({
+  apiKey: 'demo-key',
+  secret: 'demo-secret',
+  passphrase: 'demo-pass',
+  options: { sandbox: true }, // Adds x-simulated-trading header
+});
 ```
 
 ## Unified API Reference
@@ -246,58 +298,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit |
-|--------|-------------|---------|-------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | |
-| `fetchTime()` | Server time | | ✅ |
+| Method | Description | Binance | Bybit | OKX |
+|--------|-------------|---------|-------|-----|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | |
+| `fetchTime()` | Server time | | ✅ | ✅ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit |
-|--------|-------------|---------|-------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | |
-| `testOrder(...)` | Validate without placing | ✅ | |
+| Method | Description | Binance | Bybit | OKX |
+|--------|-------------|---------|-------|-----|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | |
+| `testOrder(...)` | Validate without placing | ✅ | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit |
-|--------|-------------|---------|-------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | |
+| Method | Description | Binance | Bybit | OKX |
+|--------|-------------|---------|-------|-----|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit |
-|--------|-------------|---------|-------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX |
+|--------|-------------|---------|-------|-----|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ |
 
 ## Unified Response Formats
 
@@ -377,7 +429,7 @@ const {
   OrderNotFound,
   BadSymbol,
   NetworkError,
-} = require('ygcc');
+} = require('@ygcc/ygcc');
 
 try {
   await exchange.createOrder('BTCUSDT', 'LIMIT', 'BUY', 0.001, 95000);
@@ -432,13 +484,14 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit } = require('ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
 │   ├── bybit.js                # Bybit V5 implementation (1021 lines, 45 methods)
+│   ├── okx.js                  # OKX V5 implementation (690 lines, 42 methods)
 │   └── utils/
-│       ├── crypto.js           # HMAC-SHA256 signing
+│       ├── crypto.js           # HMAC-SHA256 signing (hex + Base64)
 │       ├── errors.js           # Typed error classes
 │       ├── helpers.js          # Safe value extraction, query builders
 │       ├── throttler.js        # Token-bucket rate limiter
@@ -449,7 +502,8 @@ ygcc/
 │   └── websocket-stream.js     # Real-time streaming demo
 └── tests/
     ├── binance.test.js         # 82 tests — Binance implementation
-    └── bybit.test.js           # Bybit V5 implementation tests
+    ├── bybit.test.js           # 83 tests — Bybit V5 implementation
+    └── okx.test.js             # 91 tests — OKX V5 implementation
 ```
 
 ## Adding a New Exchange
@@ -514,15 +568,28 @@ npm test
 ▶ Bybit API Methods — mocked (20 tests)
 ▶ Bybit market() lookup (3 tests)
 ▶ Bybit vs Binance Differences (5 tests)
+▶ Module Exports — OKX (3 tests)
+▶ OKX Constructor (12 tests)
+▶ OKX Authentication (9 tests)
+▶ OKX Response Unwrapping (4 tests)
+▶ OKX Parsers (9 tests)
+▶ OKX Helper Methods (4 tests)
+▶ OKX Error Mapping (12 tests)
+▶ OKX HTTP Error Handling (5 tests)
+▶ OKX Rate Limit Header Handling (3 tests)
+▶ OKX API Methods — mocked (18 tests)
+▶ OKX market() lookup (3 tests)
+▶ OKX vs Binance/Bybit Differences (7 tests)
+▶ Crypto — hmacSHA256Base64 (2 tests)
 
-165 passing — 243ms
+256 passing — 253ms
 ```
 
 ## Roadmap
 
 - [x] Binance Spot — Full REST + WebSocket (59 methods)
 - [x] Bybit V5 — Full REST + WebSocket (45 methods)
-- [ ] OKX — REST + WebSocket
+- [x] OKX V5 — Full REST + WebSocket (42 methods)
 - [ ] Gate.io — Spot + Futures
 - [ ] KuCoin — REST + WebSocket
 - [ ] Futures/Margin support (Binance USDM, COINM)
