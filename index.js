@@ -8,6 +8,7 @@ const Gateio = require('./lib/gateio');
 const KuCoin = require('./lib/kucoin');
 const Coinbase = require('./lib/coinbase');
 const Bitfinex = require('./lib/bitfinex');
+const Bitstamp = require('./lib/bitstamp');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -36,6 +37,8 @@ module.exports = {
   coinbase: Coinbase, // lowercase alias (CCXT-style)
   Bitfinex,
   bitfinex: Bitfinex, // lowercase alias (CCXT-style)
+  Bitstamp,
+  bitstamp: Bitstamp, // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -56,8 +59,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp'],
 
   // Version
-  version: '1.7.0',
+  version: '1.8.0',
 };
