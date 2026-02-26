@@ -26,8 +26,8 @@ describe('Module Exports — KuCoin', () => {
     assert.ok(ygcc.exchanges.includes('kucoin'));
   });
 
-  it('version is 1.5.0', () => {
-    assert.strictEqual(ygcc.version, '1.5.0');
+  it('version is 1.6.0', () => {
+    assert.strictEqual(ygcc.version, '1.6.0');
   });
 });
 

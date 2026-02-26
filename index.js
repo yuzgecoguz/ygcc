@@ -6,13 +6,14 @@ const Okx = require('./lib/okx');
 const Kraken = require('./lib/kraken');
 const Gateio = require('./lib/gateio');
 const KuCoin = require('./lib/kucoin');
+const Coinbase = require('./lib/coinbase');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
 const errors = require('./lib/utils/errors');
 
 // Utilities
-const { hmacSHA256, hmacSHA256Base64, krakenSign, sha512, hmacSHA512Hex } = require('./lib/utils/crypto');
+const { hmacSHA256, hmacSHA256Base64, krakenSign, sha512, hmacSHA512Hex, base64UrlEncode, signJWT } = require('./lib/utils/crypto');
 const Throttler = require('./lib/utils/throttler');
 const WsClient = require('./lib/utils/ws');
 
@@ -30,6 +31,8 @@ module.exports = {
   gateio: Gateio,   // lowercase alias (CCXT-style)
   KuCoin,
   kucoin: KuCoin,   // lowercase alias (CCXT-style)
+  Coinbase,
+  coinbase: Coinbase, // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -43,12 +46,14 @@ module.exports = {
   krakenSign,
   sha512,
   hmacSHA512Hex,
+  base64UrlEncode,
+  signJWT,
   Throttler,
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase'],
 
   // Version
-  version: '1.5.0',
+  version: '1.6.0',
 };
