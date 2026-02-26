@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/badge/npm-v1.9.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-884%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-905%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -42,7 +42,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 9 | [Bitstamp](https://www.bitstamp.net) | `bitstamp` | ✅ | ✅ | **Ready** |
 | 10 | [Gemini](https://www.gemini.com) | `gemini` | 🔜 | 🔜 | Planned |
 | 11 | [Crypto.com](https://crypto.com) | `cryptocom` | 🔜 | 🔜 | Planned |
-| 12 | [Bittrex](https://bittrex.com) | `bittrex` | ✅ | — | **Ready** |
+| 12 | [Bittrex](https://bittrex.com) | `bittrex` | ✅ | ✅ | **Ready** |
 | 13 | [Bitrue](https://www.bitrue.com) | `bitrue` | 🔜 | 🔜 | Planned |
 | 14 | [LBANK](https://www.lbank.com) | `lbank` | 🔜 | 🔜 | Planned |
 | 15 | [BitMart](https://www.bitmart.com) | `bitmart` | 🔜 | 🔜 | Planned |
@@ -571,6 +571,35 @@ const exchange = new Bittrex({
 })();
 ```
 
+### Bittrex WebSocket (SignalR V3)
+
+```javascript
+const { Bittrex } = require('@ygcc/ygcc');
+
+const exchange = new Bittrex();
+
+// Real-time ticker via SignalR V3 hub "c3"
+exchange.watchTicker('BTC/USDT', (ticker) => {
+  console.log(`BTC: $${ticker.last} | Bid: $${ticker.bid} | Ask: $${ticker.ask}`);
+});
+
+// Real-time order book deltas
+exchange.watchOrderBook('BTC/USDT', (book) => {
+  console.log(`Bids: ${book.bids.length} | Asks: ${book.asks.length} | Seq: ${book.nonce}`);
+}, 25);
+
+// Real-time trades
+exchange.watchTrades('ETH/USD', (trade) => {
+  console.log(`${trade.side.toUpperCase()} ${trade.amount} ETH @ $${trade.price}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await exchange.closeAllWs();
+  process.exit(0);
+});
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -647,10 +676,10 @@ All exchanges implement the same method signatures:
 
 | Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex |
 |--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
 | `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
 | `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | |
 | `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
@@ -801,7 +830,7 @@ ygcc/
 │   ├── coinbase.js             # Coinbase Advanced Trade implementation (780 lines, 42 methods)
 │   ├── bitfinex.js             # Bitfinex V2 implementation (750 lines, 42 methods)
 │   ├── bitstamp.js             # Bitstamp V2 implementation (580 lines, 38 methods)
-│   ├── bittrex.js              # Bittrex V3 implementation (530 lines, 36 methods)
+│   ├── bittrex.js              # Bittrex V3 implementation (976 lines, 44 methods)
 │   └── utils/
 │       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 signing
 │       ├── errors.js           # Typed error classes
@@ -822,7 +851,7 @@ ygcc/
     ├── coinbase.test.js        # 93 tests — Coinbase Advanced Trade implementation
     ├── bitfinex.test.js        # 97 tests — Bitfinex V2 implementation
     ├── bitstamp.test.js        # 91 tests — Bitstamp V2 implementation
-    └── bittrex.test.js         # 91 tests — Bittrex V3 implementation
+    └── bittrex.test.js         # 112 tests — Bittrex V3 implementation
 ```
 
 ## Adding a New Exchange
@@ -979,7 +1008,7 @@ npm test
 ▶ Bitstamp vs Others Differences (8 tests)
 ▶ Crypto — hmacSHA256 (3 tests)
 ▶ Module Exports — Bittrex (3 tests)
-▶ Bittrex Constructor (8 tests)
+▶ Bittrex Constructor (10 tests)
 ▶ Bittrex Authentication — HMAC-SHA512 + SHA512 content hash (10 tests)
 ▶ Bittrex Response Handling (5 tests)
 ▶ Bittrex Parsers (10 tests)
@@ -991,8 +1020,10 @@ npm test
 ▶ Bittrex Market Lookup (3 tests)
 ▶ Bittrex vs Others Differences (8 tests)
 ▶ Crypto — sha512 + hmacSHA512Hex (3 tests)
+▶ Bittrex WebSocket — SignalR V3 (15 tests)
+▶ Bittrex WebSocket — SignalR Message Dispatch (5 tests)
 
-884 passing
+905 passing
 ```
 
 ## Roadmap
@@ -1006,7 +1037,7 @@ npm test
 - [x] Coinbase Advanced Trade — Full REST + WebSocket (42 methods, JWT/ES256)
 - [x] Bitfinex V2 — Full REST + WebSocket (42 methods, HMAC-SHA384)
 - [x] Bitstamp V2 — Full REST + WebSocket (38 methods, HMAC-SHA256 + UUID nonce)
-- [x] Bittrex V3 — Full REST (36 methods, HMAC-SHA512 + SHA512 content hash, DELETE for cancel)
+- [x] Bittrex V3 — Full REST + WebSocket (44 methods, HMAC-SHA512 + SHA512 content hash, SignalR V3)
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
 - [ ] npm publish

@@ -70,14 +70,23 @@ describe('Bittrex — Constructor', () => {
     assert.strictEqual(fees.trading.taker, 0.0035);
   });
 
-  it('all WebSocket features are disabled (SignalR too complex, exchange shut down)', () => {
+  it('public WebSocket features are enabled (SignalR V3 hub c3)', () => {
     const has = exchange.describe().has;
-    assert.strictEqual(has.watchTicker, false);
-    assert.strictEqual(has.watchOrderBook, false);
-    assert.strictEqual(has.watchTrades, false);
+    assert.strictEqual(has.watchTicker, true);
+    assert.strictEqual(has.watchOrderBook, true);
+    assert.strictEqual(has.watchTrades, true);
+  });
+
+  it('private/klines WebSocket features are disabled', () => {
+    const has = exchange.describe().has;
     assert.strictEqual(has.watchKlines, false);
     assert.strictEqual(has.watchBalance, false);
     assert.strictEqual(has.watchOrders, false);
+  });
+
+  it('initializes _wsClients Map and _wsInvocationId', () => {
+    assert.ok(exchange._wsClients instanceof Map);
+    assert.strictEqual(exchange._wsInvocationId, 0);
   });
 });
 
@@ -844,12 +853,14 @@ describe('Bittrex — Differences from Other Exchanges', () => {
     assert.strictEqual(exchange._toBittrexSymbol('ETH/USD'), 'ETH-USD');
   });
 
-  it('no WebSocket support (SignalR too complex, exchange shut down)', () => {
+  it('public WS enabled, private/klines WS disabled (SignalR V3 hub c3)', () => {
     const has = exchange.describe().has;
-    const wsFeatures = ['watchTicker', 'watchOrderBook', 'watchTrades', 'watchKlines', 'watchBalance', 'watchOrders'];
-    for (const f of wsFeatures) {
-      assert.strictEqual(has[f], false, f + ' should be false');
-    }
+    assert.strictEqual(has.watchTicker, true);
+    assert.strictEqual(has.watchOrderBook, true);
+    assert.strictEqual(has.watchTrades, true);
+    assert.strictEqual(has.watchKlines, false);
+    assert.strictEqual(has.watchBalance, false);
+    assert.strictEqual(has.watchOrders, false);
   });
 
   it('JSON POST body (like Bybit/OKX, unlike Kraken/Bitstamp form-encoded)', () => {
@@ -891,7 +902,356 @@ describe('Bittrex — Crypto (sha512 + hmacSHA512Hex)', () => {
 });
 
 // =============================================================================
-// 14. Version check
+// 14. WebSocket — SignalR V3 hub "c3" (15 tests)
+// =============================================================================
+
+describe('Bittrex — WebSocket (SignalR V3)', () => {
+  let exchange;
+
+  beforeEach(() => {
+    exchange = new Bittrex({ apiKey: 'testKey', secret: 'testSecret' });
+  });
+
+  it('WS URL is wss://socket.bittrex.com/signalr', () => {
+    assert.strictEqual(exchange.describe().urls.ws, 'wss://socket.bittrex.com/signalr');
+  });
+
+  it('_getWsClient creates and caches WsClient', () => {
+    const client1 = exchange._getWsClient('wss://test.com');
+    const client2 = exchange._getWsClient('wss://test.com');
+    assert.strictEqual(client1, client2);
+    assert.strictEqual(exchange._wsClients.size, 1);
+  });
+
+  it('_getWsClient creates different clients for different URLs', () => {
+    const client1 = exchange._getWsClient('wss://test1.com');
+    const client2 = exchange._getWsClient('wss://test2.com');
+    assert.notStrictEqual(client1, client2);
+    assert.strictEqual(exchange._wsClients.size, 2);
+  });
+
+  it('_subscribeBittrex sends correct SignalR hub invocation format', async () => {
+    let sentMessage;
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { sentMessage = msg; },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['ticker_BTC-USDT'], () => {});
+
+    assert.strictEqual(sentMessage.H, 'c3');
+    assert.strictEqual(sentMessage.M, 'Subscribe');
+    assert.deepStrictEqual(sentMessage.A, [['ticker_BTC-USDT']]);
+    assert.strictEqual(sentMessage.I, 1);
+  });
+
+  it('_subscribeBittrex increments invocation ID', async () => {
+    const messages = [];
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { messages.push(msg); },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['ticker_BTC-USDT'], () => {});
+    await exchange._subscribeBittrex(['trade_ETH-USD'], () => {});
+
+    assert.strictEqual(messages[0].I, 1);
+    assert.strictEqual(messages[1].I, 2);
+    assert.strictEqual(exchange._wsInvocationId, 2);
+  });
+
+  it('watchTicker subscribes to ticker_{pair} channel', async () => {
+    let sentMessage;
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { sentMessage = msg; },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange.watchTicker('BTC/USDT', () => {});
+
+    assert.deepStrictEqual(sentMessage.A, [['ticker_BTC-USDT']]);
+  });
+
+  it('watchOrderBook subscribes to orderbook_{pair}_{depth} channel', async () => {
+    let sentMessage;
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { sentMessage = msg; },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange.watchOrderBook('ETH/USD', () => {}, 25);
+
+    assert.deepStrictEqual(sentMessage.A, [['orderbook_ETH-USD_25']]);
+  });
+
+  it('watchOrderBook defaults depth to 25', async () => {
+    let sentMessage;
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { sentMessage = msg; },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange.watchOrderBook('BTC/USDT', () => {});
+
+    assert.deepStrictEqual(sentMessage.A, [['orderbook_BTC-USDT_25']]);
+  });
+
+  it('watchTrades subscribes to trade_{pair} channel', async () => {
+    let sentMessage;
+    const fakeClient = {
+      connected: true,
+      send: (msg) => { sentMessage = msg; },
+      on: () => {},
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange.watchTrades('BTC/USDT', () => {});
+
+    assert.deepStrictEqual(sentMessage.A, [['trade_BTC-USDT']]);
+  });
+
+  it('_parseWsTicker parses ticker data correctly', () => {
+    const data = { symbol: 'BTC-USDT', lastTradeRate: '50000', bidRate: '49900', askRate: '50100' };
+    const result = exchange._parseWsTicker(data, 'BTC/USDT');
+
+    assert.strictEqual(result.symbol, 'BTC/USDT');
+    assert.strictEqual(result.last, 50000);
+    assert.strictEqual(result.bid, 49900);
+    assert.strictEqual(result.ask, 50100);
+    assert.strictEqual(result.close, 50000);
+    assert.strictEqual(result.high, undefined);
+    assert.strictEqual(result.low, undefined);
+    assert.ok(result.timestamp > 0);
+    assert.ok(result.info);
+  });
+
+  it('_parseWsOrderBook parses delta data correctly', () => {
+    const data = {
+      marketSymbol: 'BTC-USDT',
+      depth: 25,
+      sequence: 12345,
+      bidDeltas: [{ rate: '49900', quantity: '0.5' }, { rate: '49800', quantity: '1.0' }],
+      askDeltas: [{ rate: '50100', quantity: '0.3' }],
+    };
+    const result = exchange._parseWsOrderBook(data, 'BTC/USDT');
+
+    assert.strictEqual(result.symbol, 'BTC/USDT');
+    assert.deepStrictEqual(result.bids[0], [49900, 0.5]);
+    assert.deepStrictEqual(result.bids[1], [49800, 1.0]);
+    assert.deepStrictEqual(result.asks[0], [50100, 0.3]);
+    assert.strictEqual(result.nonce, 12345);
+    assert.ok(result.timestamp > 0);
+  });
+
+  it('_parseWsTrades parses trade deltas correctly', () => {
+    const data = {
+      deltas: [
+        { id: '100', rate: '50000', quantity: '0.1', takerSide: 'BUY', executedAt: '2024-01-01T12:00:00Z' },
+        { id: '101', rate: '50100', quantity: '0.2', takerSide: 'SELL', executedAt: '2024-01-01T12:01:00Z' },
+      ],
+    };
+    const trades = exchange._parseWsTrades(data, 'BTC/USDT');
+
+    assert.strictEqual(trades.length, 2);
+    assert.strictEqual(trades[0].id, '100');
+    assert.strictEqual(trades[0].symbol, 'BTC/USDT');
+    assert.strictEqual(trades[0].price, 50000);
+    assert.strictEqual(trades[0].amount, 0.1);
+    assert.strictEqual(trades[0].cost, 5000);
+    assert.strictEqual(trades[0].side, 'buy');
+    assert.strictEqual(trades[1].side, 'sell');
+    assert.strictEqual(trades[1].price, 50100);
+  });
+
+  it('_parseWsTrades handles single trade (no deltas wrapper)', () => {
+    const data = { id: '200', rate: '51000', quantity: '0.5', takerSide: 'BUY', executedAt: '2024-01-01T12:00:00Z' };
+    const trades = exchange._parseWsTrades(data, 'ETH/USD');
+
+    assert.strictEqual(trades.length, 1);
+    assert.strictEqual(trades[0].id, '200');
+    assert.strictEqual(trades[0].price, 51000);
+    assert.strictEqual(trades[0].amount, 0.5);
+    assert.strictEqual(trades[0].side, 'buy');
+  });
+
+  it('closeAllWs clears all clients and handlers', async () => {
+    // Add fake entries
+    exchange._wsClients.set('url1', { close: async () => {} });
+    exchange._wsClients.set('url2', { close: async () => {} });
+    exchange._wsHandlers.set('handler1', {});
+
+    await exchange.closeAllWs();
+
+    assert.strictEqual(exchange._wsClients.size, 0);
+    assert.strictEqual(exchange._wsHandlers.size, 0);
+  });
+});
+
+// =============================================================================
+// 15. WebSocket — SignalR Message Handling (5 tests)
+// =============================================================================
+
+describe('Bittrex — WebSocket SignalR Message Dispatch', () => {
+  let exchange;
+
+  beforeEach(() => {
+    exchange = new Bittrex();
+  });
+
+  it('dispatches ticker method from SignalR hub message', async () => {
+    let receivedMethod, receivedPayload;
+    const fakeClient = {
+      connected: true,
+      send: () => {},
+      on: (event, handler) => {
+        // Simulate incoming SignalR message
+        if (event === 'message') {
+          handler({
+            C: 'cursor-123',
+            M: [{ H: 'C3', M: 'ticker', A: [JSON.stringify({ symbol: 'BTC-USDT', lastTradeRate: '50000', bidRate: '49900', askRate: '50100' })] }],
+          });
+        }
+      },
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['ticker_BTC-USDT'], (method, payload) => {
+      receivedMethod = method;
+      receivedPayload = payload;
+    });
+
+    assert.strictEqual(receivedMethod, 'ticker');
+    assert.strictEqual(receivedPayload.lastTradeRate, '50000');
+    assert.strictEqual(receivedPayload.bidRate, '49900');
+  });
+
+  it('dispatches orderBook method from SignalR hub message', async () => {
+    let receivedMethod, receivedPayload;
+    const fakeClient = {
+      connected: true,
+      send: () => {},
+      on: (event, handler) => {
+        if (event === 'message') {
+          handler({
+            C: 'cursor-456',
+            M: [{ H: 'C3', M: 'orderBook', A: [JSON.stringify({
+              marketSymbol: 'BTC-USDT', depth: 25, sequence: 100,
+              bidDeltas: [{ rate: '49900', quantity: '0.5' }],
+              askDeltas: [{ rate: '50100', quantity: '0.3' }],
+            })] }],
+          });
+        }
+      },
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['orderbook_BTC-USDT_25'], (method, payload) => {
+      receivedMethod = method;
+      receivedPayload = payload;
+    });
+
+    assert.strictEqual(receivedMethod, 'orderBook');
+    assert.ok(receivedPayload.bidDeltas);
+    assert.ok(receivedPayload.askDeltas);
+  });
+
+  it('dispatches trade method from SignalR hub message', async () => {
+    let receivedMethod, receivedPayload;
+    const fakeClient = {
+      connected: true,
+      send: () => {},
+      on: (event, handler) => {
+        if (event === 'message') {
+          handler({
+            C: 'cursor-789',
+            M: [{ H: 'C3', M: 'trade', A: [JSON.stringify({
+              deltas: [{ id: '100', rate: '50000', quantity: '0.1', takerSide: 'BUY', executedAt: '2024-01-01T12:00:00Z' }],
+            })] }],
+          });
+        }
+      },
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['trade_BTC-USDT'], (method, payload) => {
+      receivedMethod = method;
+      receivedPayload = payload;
+    });
+
+    assert.strictEqual(receivedMethod, 'trade');
+    assert.ok(receivedPayload.deltas);
+    assert.strictEqual(receivedPayload.deltas[0].id, '100');
+  });
+
+  it('handles A[0] as object (not JSON string)', async () => {
+    let receivedPayload;
+    const fakeClient = {
+      connected: true,
+      send: () => {},
+      on: (event, handler) => {
+        if (event === 'message') {
+          handler({
+            M: [{ H: 'C3', M: 'ticker', A: [{ symbol: 'BTC-USDT', lastTradeRate: '50000' }] }],
+          });
+        }
+      },
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['ticker_BTC-USDT'], (method, payload) => {
+      receivedPayload = payload;
+    });
+
+    assert.strictEqual(receivedPayload.lastTradeRate, '50000');
+  });
+
+  it('ignores non-hub messages (no M array)', async () => {
+    let callCount = 0;
+    const fakeClient = {
+      connected: true,
+      send: () => {},
+      on: (event, handler) => {
+        if (event === 'message') {
+          // Send various non-hub messages
+          handler({ R: true, I: '1' });         // Invocation response
+          handler({ S: 1, G: 'group-id' });     // Init message
+          handler({});                           // Empty
+        }
+      },
+    };
+    exchange._getWsClient = () => fakeClient;
+    exchange._ensureWsConnected = async () => fakeClient;
+
+    await exchange._subscribeBittrex(['ticker_BTC-USDT'], () => {
+      callCount++;
+    });
+
+    assert.strictEqual(callCount, 0);
+  });
+});
+
+// =============================================================================
+// 16. Version check
 // =============================================================================
 
 describe('Bittrex — Version', () => {
