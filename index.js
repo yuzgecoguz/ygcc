@@ -10,13 +10,14 @@ const Coinbase = require('./lib/coinbase');
 const Bitfinex = require('./lib/bitfinex');
 const Bitstamp = require('./lib/bitstamp');
 const Bittrex = require('./lib/bittrex');
+const LBank = require('./lib/lbank');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
 const errors = require('./lib/utils/errors');
 
 // Utilities
-const { hmacSHA256, hmacSHA256Base64, krakenSign, sha512, hmacSHA512Hex, hmacSHA384Hex, base64UrlEncode, signJWT } = require('./lib/utils/crypto');
+const { hmacSHA256, hmacSHA256Base64, md5, krakenSign, sha512, hmacSHA512Hex, hmacSHA384Hex, base64UrlEncode, signJWT } = require('./lib/utils/crypto');
 const Throttler = require('./lib/utils/throttler');
 const WsClient = require('./lib/utils/ws');
 
@@ -42,6 +43,8 @@ module.exports = {
   bitstamp: Bitstamp, // lowercase alias (CCXT-style)
   Bittrex,
   bittrex: Bittrex,   // lowercase alias (CCXT-style)
+  LBank,
+  lbank: LBank,       // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -52,6 +55,7 @@ module.exports = {
   // Utilities
   hmacSHA256,
   hmacSHA256Base64,
+  md5,
   krakenSign,
   sha512,
   hmacSHA512Hex,
@@ -62,8 +66,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank'],
 
   // Version
-  version: '1.9.0',
+  version: '2.0.0',
 };

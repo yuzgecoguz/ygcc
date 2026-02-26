@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v1.9.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v2.0.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-905%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-1015%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp)
+- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -44,7 +44,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 11 | [Crypto.com](https://crypto.com) | `cryptocom` | 🔜 | 🔜 | Planned |
 | 12 | [Bittrex](https://bittrex.com) | `bittrex` | ✅ | ✅ | **Ready** |
 | 13 | [Bitrue](https://www.bitrue.com) | `bitrue` | 🔜 | 🔜 | Planned |
-| 14 | [LBANK](https://www.lbank.com) | `lbank` | 🔜 | 🔜 | Planned |
+| 14 | [LBANK](https://www.lbank.com) | `lbank` | ✅ | ✅ | **Ready** |
 | 15 | [BitMart](https://www.bitmart.com) | `bitmart` | 🔜 | 🔜 | Planned |
 | 16 | [Bitforex](https://www.bitforex.com) | `bitforex` | 🔜 | 🔜 | Planned |
 | 17 | [Phemex](https://phemex.com) | `phemex` | 🔜 | 🔜 | Planned |
@@ -600,6 +600,83 @@ process.on('SIGINT', async () => {
 });
 ```
 
+### Using LBank
+
+```javascript
+const { LBank } = require('@ygcc/ygcc');
+
+const exchange = new LBank();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${Object.keys(exchange.markets).length} symbols loaded`);
+
+  // LBank uses underscore-separated lowercase symbols: btc_usdt
+  const ticker = await exchange.fetchTicker('BTC/USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USDT', 50);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### LBank Trading (Private)
+
+```javascript
+const { LBank } = require('@ygcc/ygcc');
+
+const exchange = new LBank({
+  apiKey: process.env.LBANK_API_KEY,
+  secret: process.env.LBANK_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // LBank uses MD5+HMAC-SHA256 two-step signing, POST params in query string
+  const order = await exchange.createLimitOrder('BTC/USDT', 'buy', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/USDT');
+  console.log(`Canceled: ${canceled.id}`);
+})();
+```
+
+### LBank WebSocket (V3 JSON)
+
+```javascript
+const { LBank } = require('@ygcc/ygcc');
+
+const exchange = new LBank();
+
+// Real-time ticker via V3 JSON subscribe
+exchange.watchTicker('BTC/USDT', (ticker) => {
+  console.log(`BTC: $${ticker.last} | Bid: $${ticker.bid} | Ask: $${ticker.ask}`);
+});
+
+// Real-time order book depth
+exchange.watchOrderBook('BTC/USDT', (book) => {
+  console.log(`Bids: ${book.bids.length} | Asks: ${book.asks.length}`);
+}, 50);
+
+// Real-time trades
+exchange.watchTrades('ETH/USDT', (trades) => {
+  trades.forEach(t => console.log(`${t.side.toUpperCase()} ${t.amount} ETH @ $${t.price}`));
+});
+
+// Real-time klines
+exchange.watchKlines('BTC/USDT', '1m', (kline) => {
+  console.log(`Open: ${kline.open} | Close: ${kline.close} | Vol: ${kline.volume}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await exchange.closeAllWs();
+  process.exit(0);
+});
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -632,58 +709,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | |
-| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | | |
+| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | |
-| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | | |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | | |
+| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
 
 ## Unified Response Formats
 
@@ -818,7 +895,7 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
@@ -831,8 +908,9 @@ ygcc/
 │   ├── bitfinex.js             # Bitfinex V2 implementation (750 lines, 42 methods)
 │   ├── bitstamp.js             # Bitstamp V2 implementation (580 lines, 38 methods)
 │   ├── bittrex.js              # Bittrex V3 implementation (976 lines, 44 methods)
+│   ├── lbank.js                # LBank V2 implementation (530 lines, 40 methods)
 │   └── utils/
-│       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 signing
+│       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 + MD5 signing
 │       ├── errors.js           # Typed error classes
 │       ├── helpers.js          # Safe value extraction, query builders
 │       ├── throttler.js        # Token-bucket rate limiter
@@ -851,7 +929,8 @@ ygcc/
     ├── coinbase.test.js        # 93 tests — Coinbase Advanced Trade implementation
     ├── bitfinex.test.js        # 97 tests — Bitfinex V2 implementation
     ├── bitstamp.test.js        # 91 tests — Bitstamp V2 implementation
-    └── bittrex.test.js         # 112 tests — Bittrex V3 implementation
+    ├── bittrex.test.js         # 112 tests — Bittrex V3 implementation
+    └── lbank.test.js           # 110 tests — LBank V2 implementation
 ```
 
 ## Adding a New Exchange
@@ -1022,8 +1101,24 @@ npm test
 ▶ Crypto — sha512 + hmacSHA512Hex (3 tests)
 ▶ Bittrex WebSocket — SignalR V3 (15 tests)
 ▶ Bittrex WebSocket — SignalR Message Dispatch (5 tests)
+▶ Module Exports — LBank (3 tests)
+▶ LBank Constructor (9 tests)
+▶ LBank Authentication — MD5 + HMAC-SHA256 (10 tests)
+▶ LBank Response Handling (5 tests)
+▶ LBank Parsers (10 tests)
+▶ LBank Helper Methods (8 tests)
+▶ LBank Error Mapping (7 tests)
+▶ LBank HTTP Error Handling (6 tests)
+▶ LBank Rate Limit Handling (3 tests)
+▶ LBank Mocked API Calls (15 tests)
+▶ LBank Market Lookup (3 tests)
+▶ LBank vs Others Differences (8 tests)
+▶ Crypto — md5 + hmacSHA256 (3 tests)
+▶ LBank WebSocket — V3 JSON subscribe (14 tests)
+▶ LBank WebSocket — Message Dispatch (5 tests)
+▶ LBank Version (1 test)
 
-905 passing
+1015 passing
 ```
 
 ## Roadmap
@@ -1038,6 +1133,7 @@ npm test
 - [x] Bitfinex V2 — Full REST + WebSocket (42 methods, HMAC-SHA384)
 - [x] Bitstamp V2 — Full REST + WebSocket (38 methods, HMAC-SHA256 + UUID nonce)
 - [x] Bittrex V3 — Full REST + WebSocket (44 methods, HMAC-SHA512 + SHA512 content hash, SignalR V3)
+- [x] LBank V2 — Full REST + WebSocket (40 methods, MD5+HMAC-SHA256 two-step signing, V3 JSON WS)
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
 - [ ] npm publish
