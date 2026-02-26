@@ -26,8 +26,8 @@ describe('Module Exports — Kraken', () => {
     assert.ok(ygcc.exchanges.includes('kraken'));
   });
 
-  it('version is 1.6.0', () => {
-    assert.strictEqual(ygcc.version, '1.6.0');
+  it('version is 1.7.0', () => {
+    assert.strictEqual(ygcc.version, '1.7.0');
   });
 });
 
