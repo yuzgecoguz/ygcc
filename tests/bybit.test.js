@@ -20,8 +20,8 @@ describe('Module Exports — Bybit', () => {
     assert.ok(lib.exchanges.includes('bybit'));
   });
 
-  it('version is 1.8.0', () => {
-    assert.strictEqual(lib.version, '1.8.0');
+  it('version is 1.9.0', () => {
+    assert.strictEqual(lib.version, '1.9.0');
   });
 });
 
