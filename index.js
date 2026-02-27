@@ -11,6 +11,7 @@ const Bitfinex = require('./lib/bitfinex');
 const Bitstamp = require('./lib/bitstamp');
 const Bittrex = require('./lib/bittrex');
 const LBank = require('./lib/lbank');
+const Phemex = require('./lib/phemex');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -45,6 +46,8 @@ module.exports = {
   bittrex: Bittrex,   // lowercase alias (CCXT-style)
   LBank,
   lbank: LBank,       // lowercase alias (CCXT-style)
+  Phemex,
+  phemex: Phemex,     // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -66,8 +69,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex'],
 
   // Version
-  version: '2.0.0',
+  version: '2.1.0',
 };
