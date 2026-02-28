@@ -862,7 +862,7 @@ describe('BitMart WebSocket — Message Dispatch', () => {
 // 16. VERSION
 // ═══════════════════════════════════════════════════════════════════════
 describe('BitMart Version', () => {
-  it('version is 2.2.0', () => {
-    assert.strictEqual(ygcc.version, '2.2.0');
+  it('version is 2.3.0', () => {
+    assert.strictEqual(ygcc.version, '2.3.0');
   });
 });
