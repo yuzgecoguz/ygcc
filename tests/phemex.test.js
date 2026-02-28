@@ -1000,7 +1000,7 @@ describe('Phemex — WebSocket Message Dispatch', () => {
 // =============================================================================
 
 describe('Phemex — Version', () => {
-  it('version is 2.4.0', () => {
-    assert.strictEqual(ygcc.version, '2.4.0');
+  it('version is 2.5.0', () => {
+    assert.strictEqual(ygcc.version, '2.5.0');
   });
 });

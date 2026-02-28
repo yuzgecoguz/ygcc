@@ -1036,7 +1036,7 @@ describe('LBank — WebSocket Message Dispatch', () => {
 // =============================================================================
 
 describe('LBank — Version', () => {
-  it('version is 2.4.0', () => {
-    assert.strictEqual(ygcc.version, '2.4.0');
+  it('version is 2.5.0', () => {
+    assert.strictEqual(ygcc.version, '2.5.0');
   });
 });

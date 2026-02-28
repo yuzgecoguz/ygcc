@@ -1255,7 +1255,7 @@ describe('Bittrex — WebSocket SignalR Message Dispatch', () => {
 // =============================================================================
 
 describe('Bittrex — Version', () => {
-  it('library version is 2.4.0', () => {
-    assert.strictEqual(ygcc.version, '2.4.0');
+  it('library version is 2.5.0', () => {
+    assert.strictEqual(ygcc.version, '2.5.0');
   });
 });
