@@ -826,7 +826,7 @@ describe('Bibox WS Parsers', () => {
 // 16. Version
 // ═══════════════════════════════════════════════════════════════
 describe('Bibox Version', () => {
-  it('library version is 2.7.0', () => {
-    assert.strictEqual(lib.version, '2.7.0');
+  it('library version is 2.8.0', () => {
+    assert.strictEqual(lib.version, '2.8.0');
   });
 });

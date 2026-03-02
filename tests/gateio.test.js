@@ -26,8 +26,8 @@ describe('Module Exports — Gate.io', () => {
     assert.ok(ygcc.exchanges.includes('gateio'));
   });
 
-  it('version is 2.7.0', () => {
-    assert.strictEqual(ygcc.version, '2.7.0');
+  it('version is 2.8.0', () => {
+    assert.strictEqual(ygcc.version, '2.8.0');
   });
 });
 

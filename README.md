@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v2.7.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v2.8.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-1929%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-2305%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex), dual V3 HmacMD5 + V4 HmacSHA256 (Bibox), Base64+HMAC-SHA512 (WhiteBit), HMAC-SHA512 timestamp+method+path (VALR), HMAC-SHA256 uppercase 4-credential (Bitexen)
+- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex), dual V3 HmacMD5 + V4 HmacSHA256 (Bibox), Base64+HMAC-SHA512 (WhiteBit), HMAC-SHA512 timestamp+method+path (VALR), HMAC-SHA256 uppercase 4-credential (Bitexen), Base64-decoded HMAC-SHA256 (BtcTurk), HMAC-SHA384 path-signing (BTSE), HMAC-SHA512 form-encoded (EXMO), double-layer HMAC-SHA256 (CoinTR)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -53,10 +53,10 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 20 | [WhiteBit](https://whitebit.com) | `whitebit` | ✅ | ✅ | **Ready** |
 | 21 | [VALR](https://www.valr.com) | `valr` | ✅ | ✅ | **Ready** |
 | 22 | [Bitexen](https://www.bitexen.com) | `bitexen` | ✅ | ✅ | **Ready** |
-| 23 | [BtcTurk](https://www.btcturk.com) | `btcturk` | 🔜 | 🔜 | Planned |
-| 24 | [BTSE](https://www.btse.com) | `btse` | 🔜 | 🔜 | Planned |
-| 25 | [EXMO](https://exmo.com) | `exmo` | 🔜 | 🔜 | Planned |
-| 26 | [CoinTR](https://www.cointr.com) | `cointr` | 🔜 | 🔜 | Planned |
+| 23 | [BtcTurk](https://www.btcturk.com) | `btcturk` | ✅ | ✅ | **Ready** |
+| 24 | [BTSE](https://www.btse.com) | `btse` | ✅ | ✅ | **Ready** |
+| 25 | [EXMO](https://exmo.com) | `exmo` | ✅ | ✅ | **Ready** |
+| 26 | [CoinTR](https://www.cointr.com) | `cointr` | ✅ | ✅ | **Ready** |
 | 27 | [Coinzix](https://coinzix.com) | `coinzix` | 🔜 | 🔜 | Planned |
 | 28 | [DigiFinex](https://www.digifinex.com) | `digifinex` | 🔜 | 🔜 | Planned |
 | 29 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | 🔜 | 🔜 | Planned |
@@ -1293,6 +1293,195 @@ process.on('SIGINT', async () => {
 });
 ```
 
+### Using BtcTurk
+
+```javascript
+const { BtcTurk } = require('@ygcc/ygcc');
+
+const exchange = new BtcTurk();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // BtcTurk uses concatenated symbols: BTCTRY (Turkish exchange)
+  const ticker = await exchange.fetchTicker('BTC/TRY');
+  console.log(`BTC: ₺${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/TRY', 5);
+  console.log(`Best bid: ₺${book.bids[0][0]} | Best ask: ₺${book.asks[0][0]}`);
+})();
+```
+
+### BtcTurk Trading (Private)
+
+```javascript
+const { BtcTurk } = require('@ygcc/ygcc');
+
+const exchange = new BtcTurk({
+  apiKey: process.env.BTCTURK_API_KEY,
+  secret: process.env.BTCTURK_SECRET, // Base64-encoded secret
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('TRY:', balance.TRY);
+
+  // BtcTurk uses HMAC-SHA256 with Base64-decoded secret key
+  const order = await exchange.createLimitOrder('BTC/TRY', 'buy', 0.001, 2500000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  // cancelOrder uses DELETE with id in query params
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/TRY');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
+### BtcTurk WebSocket
+
+```javascript
+const { BtcTurk } = require('@ygcc/ygcc');
+
+const exchange = new BtcTurk();
+
+// Real-time order book via JSON array protocol [type, payload]
+exchange.watchOrderBook('BTC/TRY', (book) => {
+  const spread = book.asks[0][0] - book.bids[0][0];
+  console.log(`Spread: ₺${spread.toFixed(2)}`);
+});
+```
+
+### Using BTSE
+
+```javascript
+const { Btse } = require('@ygcc/ygcc');
+
+const exchange = new Btse();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // BTSE uses hyphen-separated symbols: BTC-USDT
+  const ticker = await exchange.fetchTicker('BTC/USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USDT', 5);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### BTSE Trading (Private)
+
+```javascript
+const { Btse } = require('@ygcc/ygcc');
+
+const exchange = new Btse({
+  apiKey: process.env.BTSE_API_KEY,
+  secret: process.env.BTSE_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // BTSE uses HMAC-SHA384, numeric order types (76=limit, 77=market)
+  const order = await exchange.createLimitOrder('BTC/USDT', 'BUY', 0.001, 65000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  // cancelOrder uses DELETE with JSON body
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/USDT');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
+### Using EXMO
+
+```javascript
+const { Exmo } = require('@ygcc/ygcc');
+
+const exchange = new Exmo();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // EXMO uses underscore-separated symbols: BTC_USD
+  const ticker = await exchange.fetchTicker('BTC/USD');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USD', 5);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### EXMO Trading (Private)
+
+```javascript
+const { Exmo } = require('@ygcc/ygcc');
+
+const exchange = new Exmo({
+  apiKey: process.env.EXMO_API_KEY,
+  secret: process.env.EXMO_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USD:', balance.USD);
+
+  // EXMO uses HMAC-SHA512 with form-encoded POST, nonce in body
+  const order = await exchange.createLimitOrder('BTC/USD', 'buy', 0.001, 65000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  // cancelOrder also uses POST (all private endpoints are POST)
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/USD');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
+### Using CoinTR
+
+```javascript
+const { Cointr } = require('@ygcc/ygcc');
+
+const exchange = new Cointr();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // CoinTR uses concatenated symbols: BTCUSDT (OKX-style API)
+  const ticker = await exchange.fetchTicker('BTC/USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USDT', 5);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### CoinTR Trading (Private)
+
+```javascript
+const { Cointr } = require('@ygcc/ygcc');
+
+const exchange = new Cointr({
+  apiKey: process.env.COINTR_API_KEY,
+  secret: process.env.COINTR_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // CoinTR uses double-layer HMAC-SHA256, auto-generates clOrdId (UUID)
+  const order = await exchange.createLimitOrder('BTC/USDT', 'buy', 0.001, 65000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  const canceled = await exchange.cancelOrder(order.id, 'BTC/USDT');
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -1325,58 +1514,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ❌ | ❌ | ✅ | ❌ | ✅ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | | | | | | | | | | | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | | | | | | | | | | | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | | | | | | | | | | | |
-| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ❌ | ❌ | ❌ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen | BtcTurk | BTSE | EXMO | CoinTR |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|---------|------|------|--------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ❌ | ❌ | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ✅ | ✅ | ❌ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | | ❌ | ❌ | ❌ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | | | | | | | | | | | |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | | | | | | | | | | | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | | | | | | | | | | | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | | | | | | | | | | | |
-| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | | | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen | BtcTurk | BTSE | EXMO | CoinTR |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|---------|------|------|--------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | | ❌ | ❌ | ❌ | | | | |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | | | | | | | | | | | | | | | |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | | | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | | | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen | BtcTurk | BTSE | EXMO | CoinTR |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|---------|------|------|--------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | | | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | | | | | | | | | | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | | | | | | | | | | | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox | WhiteBit | VALR | Bitexen | BtcTurk | BTSE | EXMO | CoinTR |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|----------|------|---------|---------|------|------|--------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | | | | | | | | | | | | | | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 ## Unified Response Formats
 
@@ -1511,7 +1700,7 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank, Phemex, BitMart, Bitrue, Bitforex, Pionex, Bibox, WhiteBit, Valr, Bitexen } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank, Phemex, BitMart, Bitrue, Bitforex, Pionex, Bibox, WhiteBit, Valr, Bitexen, BtcTurk, Btse, Exmo, Cointr } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
@@ -1534,6 +1723,10 @@ ygcc/
 │   ├── whitebit.js             # WhiteBit — Base64+HMAC-SHA512, zlib Z_SYNC_FLUSH WS, all private POST
 │   ├── valr.js                 # VALR — HMAC-SHA512 timestamp+method+path, DELETE with JSON body, ZAR pairs
 │   ├── bitexen.js              # Bitexen — 4-credential HMAC-SHA256 uppercase, Socket.IO v2 WS, TRY pairs
+│   ├── btcturk.js              # BtcTurk exchange
+│   ├── btse.js                 # BTSE exchange
+│   ├── exmo.js                 # EXMO exchange
+│   ├── cointr.js               # CoinTR exchange
 │   └── utils/
 │       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 + MD5 + HmacMD5 + Base64-decoded + memo + path + Base64 + uppercase signing
 │       ├── errors.js           # Typed error classes
@@ -1564,7 +1757,11 @@ ygcc/
     ├── bibox.test.js           # 98 tests — Bibox dual-auth implementation
     ├── whitebit.test.js        # 94 tests — WhiteBit Base64+HMAC-SHA512 implementation
     ├── valr.test.js            # 97 tests — VALR HMAC-SHA512 implementation
-    └── bitexen.test.js         # 101 tests — Bitexen 4-credential implementation
+    ├── bitexen.test.js         # 101 tests — Bitexen 4-credential implementation
+    ├── btcturk.test.js         # 97 tests — BtcTurk tests (97 tests, 16 sections)
+    ├── btse.test.js            # 94 tests — BTSE tests (94 tests, 16 sections)
+    ├── exmo.test.js            # 93 tests — EXMO tests (93 tests, 16 sections)
+    └── cointr.test.js          # 92 tests — CoinTR tests (92 tests, 16 sections)
 ```
 
 ## Adding a New Exchange
@@ -1895,8 +2092,72 @@ npm test
 ▶ WebSocket — Socket.IO v2 + SID handshake (10 tests)
 ▶ Bitexen WS Parsers (4 tests)
 ▶ Bitexen Version (1 test)
+▶ Module Exports — BtcTurk (3 tests)
+▶ BtcTurk Constructor (8 tests)
+▶ Auth HMAC-SHA256 Base64 (10 tests)
+▶ BtcTurk Response Handling (5 tests)
+▶ BtcTurk Parsers (8 tests)
+▶ BtcTurk Helpers (7 tests)
+▶ BtcTurk Error Mapping (8 tests)
+▶ BtcTurk HTTP Errors (6 tests)
+▶ BtcTurk Rate Limits (3 tests)
+▶ BtcTurk Mocked API (10 tests)
+▶ BtcTurk Market Lookup (3 tests)
+▶ BtcTurk vs Others (8 tests)
+▶ Crypto hmacSHA256Base64 (3 tests)
+▶ WebSocket JSON array (5 tests)
+▶ BtcTurk WS Parsers (4 tests)
+▶ BtcTurk Version (1 test)
+▶ Module Exports — BTSE (3 tests)
+▶ BTSE Constructor (8 tests)
+▶ Auth HMAC-SHA384 (10 tests)
+▶ BTSE Response Handling (5 tests)
+▶ BTSE Parsers (8 tests)
+▶ BTSE Helpers (7 tests)
+▶ BTSE Error Mapping (8 tests)
+▶ BTSE HTTP Errors (6 tests)
+▶ BTSE Rate Limits (3 tests)
+▶ BTSE Mocked API (10 tests)
+▶ BTSE Market Lookup (3 tests)
+▶ BTSE vs Others (8 tests)
+▶ Crypto hmacSHA384Hex (3 tests)
+▶ WebSocket ping/pong (5 tests)
+▶ BTSE WS Parsers (4 tests)
+▶ BTSE Version (1 test)
+▶ Module Exports — EXMO (3 tests)
+▶ EXMO Constructor (8 tests)
+▶ Auth HMAC-SHA512 (10 tests)
+▶ EXMO Response Handling (5 tests)
+▶ EXMO Parsers (8 tests)
+▶ EXMO Helpers (7 tests)
+▶ EXMO Error Mapping (8 tests)
+▶ EXMO HTTP Errors (6 tests)
+▶ EXMO Rate Limits (3 tests)
+▶ EXMO Mocked API (10 tests)
+▶ EXMO Market Lookup (3 tests)
+▶ EXMO vs Others (8 tests)
+▶ Crypto hmacSHA512Hex (3 tests)
+▶ WebSocket subscribe/topics (5 tests)
+▶ EXMO WS Parsers (4 tests)
+▶ EXMO Version (1 test)
+▶ Module Exports — CoinTR (3 tests)
+▶ CoinTR Constructor (8 tests)
+▶ Auth Double HMAC-SHA256 (10 tests)
+▶ CoinTR Response Handling (5 tests)
+▶ CoinTR Parsers (8 tests)
+▶ CoinTR Helpers (7 tests)
+▶ CoinTR Error Mapping (8 tests)
+▶ CoinTR HTTP Errors (6 tests)
+▶ CoinTR Rate Limits (3 tests)
+▶ CoinTR Mocked API (10 tests)
+▶ CoinTR Market Lookup (3 tests)
+▶ CoinTR vs Others (8 tests)
+▶ Crypto double hmacSHA256 (3 tests)
+▶ WebSocket op/subscribe (5 tests)
+▶ CoinTR WS Parsers (4 tests)
+▶ CoinTR Version (1 test)
 
-1929 passing
+2305 passing
 ```
 
 ## Roadmap
@@ -1921,6 +2182,10 @@ npm test
 - [x] **WhiteBit** — Base64+HMAC-SHA512 signing, all private endpoints POST, zlib Z_SYNC_FLUSH compressed WS, client-initiated ping
 - [x] **VALR** — HMAC-SHA512 timestamp+method+path+body signing, DELETE with JSON body, concatenated ZAR pairs, plain JSON WS
 - [x] **Bitexen** — 4-credential HMAC-SHA256 uppercase signing, Socket.IO v2 WS (SID handshake, Engine.IO keepalive), limit orders only, TRY pairs
+- [x] **BtcTurk** — Base64-decoded HMAC-SHA256, concatenated symbols, TRY markets
+- [x] **BTSE** — HMAC-SHA384, DELETE with JSON body, numeric order types
+- [x] **EXMO** — HMAC-SHA512, form-encoded POST, underscore symbols
+- [x] **CoinTR** — Double-layer HMAC-SHA256, auto-generated clOrdId, OKX-style API
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
 - [ ] npm publish

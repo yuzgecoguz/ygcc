@@ -755,7 +755,7 @@ describe('VALR WS Parsers', () => {
 // 16. Version
 // ═══════════════════════════════════════════════════════════════
 describe('VALR Version', () => {
-  it('library version is 2.7.0', () => {
-    assert.strictEqual(lib.version, '2.7.0');
+  it('library version is 2.8.0', () => {
+    assert.strictEqual(lib.version, '2.8.0');
   });
 });
