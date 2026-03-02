@@ -871,7 +871,7 @@ describe('Bitrue WS Message Dispatch + Parsers', () => {
 // 16. Version
 // ═══════════════════════════════════════════════════════════════════════════════
 describe('Bitrue Version', () => {
-  it('library version is 2.6.0', () => {
-    assert.strictEqual(lib.version, '2.6.0');
+  it('library version is 2.7.0', () => {
+    assert.strictEqual(lib.version, '2.7.0');
   });
 });

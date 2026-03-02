@@ -17,6 +17,9 @@ const Bitrue = require('./lib/bitrue');
 const Bitforex = require('./lib/bitforex');
 const Pionex = require('./lib/pionex');
 const Bibox = require('./lib/bibox');
+const WhiteBit = require('./lib/whitebit');
+const Valr = require('./lib/valr');
+const Bitexen = require('./lib/bitexen');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -63,6 +66,12 @@ module.exports = {
   pionex: Pionex,     // lowercase alias (CCXT-style)
   Bibox,
   bibox: Bibox,       // lowercase alias (CCXT-style)
+  WhiteBit,
+  whitebit: WhiteBit, // lowercase alias (CCXT-style)
+  Valr,
+  valr: Valr,         // lowercase alias (CCXT-style)
+  Bitexen,
+  bitexen: Bitexen,   // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -86,8 +95,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox', 'whitebit', 'valr', 'bitexen'],
 
   // Version
-  version: '2.6.0',
+  version: '2.7.0',
 };

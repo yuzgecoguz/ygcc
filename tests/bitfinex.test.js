@@ -30,8 +30,8 @@ describe('Module Exports — Bitfinex', () => {
     assert.ok(ygcc.exchanges.includes('bitfinex'));
   });
 
-  it('version is 2.6.0', () => {
-    assert.strictEqual(ygcc.version, '2.6.0');
+  it('version is 2.7.0', () => {
+    assert.strictEqual(ygcc.version, '2.7.0');
   });
 });
 
