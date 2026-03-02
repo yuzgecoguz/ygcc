@@ -16,13 +16,14 @@ const BitMart = require('./lib/bitmart');
 const Bitrue = require('./lib/bitrue');
 const Bitforex = require('./lib/bitforex');
 const Pionex = require('./lib/pionex');
+const Bibox = require('./lib/bibox');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
 const errors = require('./lib/utils/errors');
 
 // Utilities
-const { hmacSHA256, hmacSHA256Base64, md5, krakenSign, sha512, hmacSHA512Hex, hmacSHA384Hex, base64UrlEncode, signJWT } = require('./lib/utils/crypto');
+const { hmacSHA256, hmacSHA256Base64, sha256, md5, hmacMD5, krakenSign, sha512, hmacSHA512Hex, hmacSHA384Hex, base64UrlEncode, signJWT } = require('./lib/utils/crypto');
 const Throttler = require('./lib/utils/throttler');
 const WsClient = require('./lib/utils/ws');
 
@@ -60,6 +61,8 @@ module.exports = {
   bitforex: Bitforex, // lowercase alias (CCXT-style)
   Pionex,
   pionex: Pionex,     // lowercase alias (CCXT-style)
+  Bibox,
+  bibox: Bibox,       // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -70,7 +73,9 @@ module.exports = {
   // Utilities
   hmacSHA256,
   hmacSHA256Base64,
+  sha256,
   md5,
+  hmacMD5,
   krakenSign,
   sha512,
   hmacSHA512Hex,
@@ -81,8 +86,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox'],
 
   // Version
-  version: '2.5.0',
+  version: '2.6.0',
 };

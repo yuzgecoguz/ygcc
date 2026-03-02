@@ -26,8 +26,8 @@ describe('Module Exports — Kraken', () => {
     assert.ok(ygcc.exchanges.includes('kraken'));
   });
 
-  it('version is 2.5.0', () => {
-    assert.strictEqual(ygcc.version, '2.5.0');
+  it('version is 2.6.0', () => {
+    assert.strictEqual(ygcc.version, '2.6.0');
   });
 });
 
@@ -693,7 +693,7 @@ describe('Kraken Mocked API Calls', () => {
         'OXXXXX': {
           status: 'closed',
           descr: { pair: 'XXBTZUSD', type: 'buy', ordertype: 'limit', price: '45000' },
-          vol: '0.5', vol_exec: '0.5', cost: '22500', fee: '58.5',
+          vol: '0.5', vol_exec: '0.5', cost: '2.6.0', fee: '58.5',
         },
       },
     };

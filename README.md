@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v2.5.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v2.6.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-1539%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-1637%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex)
+- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex), dual V3 HmacMD5 + V4 HmacSHA256 (Bibox)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -49,7 +49,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 16 | [Bitforex](https://www.bitforex.com) | `bitforex` | ✅ | ✅ | **Ready** |
 | 17 | [Phemex](https://phemex.com) | `phemex` | ✅ | ✅ | **Ready** |
 | 18 | [Pionex](https://www.pionex.com) | `pionex` | ✅ | ✅ | **Ready** |
-| 19 | [Bibox](https://www.bibox.com) | `bibox` | 🔜 | 🔜 | Planned |
+| 19 | [Bibox](https://www.bibox.com) | `bibox` | ✅ | ✅ | **Ready** |
 | 20 | [Bitexen](https://www.bitexen.com) | `bitexen` | 🔜 | 🔜 | Planned |
 | 21 | [VALR](https://www.valr.com) | `valr` | 🔜 | 🔜 | Planned |
 | 22 | [WhiteBit](https://whitebit.com) | `whitebit` | 🔜 | 🔜 | Planned |
@@ -1055,6 +1055,71 @@ process.on('SIGINT', async () => {
 });
 ```
 
+### Using Bibox
+
+```javascript
+const { Bibox } = require('@ygcc/ygcc');
+
+const exchange = new Bibox();
+
+(async () => {
+  await exchange.loadMarkets();
+  console.log(`${exchange.symbols.length} symbols loaded`);
+
+  // Bibox uses underscore-separated symbols: BTC_USDT
+  const ticker = await exchange.fetchTicker('BTC/USDT');
+  console.log(`BTC: $${ticker.last}`);
+
+  const book = await exchange.fetchOrderBook('BTC/USDT', 10);
+  console.log(`Best bid: $${book.bids[0][0]} | Best ask: $${book.asks[0][0]}`);
+})();
+```
+
+### Bibox Trading (Private)
+
+```javascript
+const { Bibox } = require('@ygcc/ygcc');
+
+const exchange = new Bibox({
+  apiKey: process.env.BIBOX_API_KEY,
+  secret: process.env.BIBOX_SECRET,
+});
+
+(async () => {
+  const balance = await exchange.fetchBalance();
+  console.log('USDT:', balance.USDT);
+
+  // Bibox uses dual auth: V3 HmacMD5 for trading, V4 HmacSHA256 for account
+  // Only limit orders supported (no market orders)
+  const order = await exchange.createLimitOrder('BTC/USDT', 'BUY', 0.001, 50000);
+  console.log(`Order ${order.id}: ${order.status}`);
+
+  // Cancel uses POST (not DELETE like Pionex)
+  const canceled = await exchange.cancelOrder(order.id);
+  console.log(`Canceled: ${canceled.status}`);
+})();
+```
+
+### Bibox WebSocket (zlib compressed)
+
+```javascript
+const { Bibox } = require('@ygcc/ygcc');
+
+const exchange = new Bibox();
+
+// Real-time order book via zlib-compressed binary data
+exchange.watchOrderBook('BTC/USDT', (book) => {
+  const spread = book.asks[0][0] - book.bids[0][0];
+  console.log(`Spread: $${spread.toFixed(2)}`);
+}, 10);
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  await exchange.closeAllWs();
+  process.exit(0);
+});
+```
+
 ### Testnet / Sandbox Mode
 
 ```javascript
@@ -1087,58 +1152,58 @@ All exchanges implement the same method signatures:
 
 ### Market Data (Public)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|
-| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ❌ |
-| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | | | | | | | |
-| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | | | | | | | |
-| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | | | | | | | |
-| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|
+| `loadMarkets()` | Load trading pairs, filters, precision rules | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchTicker(symbol)` | 24hr price statistics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| `fetchTickers(symbols?)` | All tickers at once | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ❌ | ❌ |
+| `fetchOrderBook(symbol, limit?)` | Bids & asks depth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ✅ |
+| `fetchTrades(symbol, since?, limit?)` | Recent public trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `fetchOHLCV(symbol, timeframe?, since?, limit?)` | Candlestick / kline data | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `fetchAvgPrice(symbol)` | Current average price | ✅ | | | | | | | | | | | | | | | | |
+| `fetchPrice(symbol?)` | Quick price lookup (lightweight) | ✅ | | | | | | | | | | | | | | | | |
+| `fetchBookTicker(symbol?)` | Best bid/ask only | ✅ | | | | | | | | | | | | | | | | |
+| `fetchTime()` | Server time | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | |
 
 ### Trading (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|
-| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
-| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ |
-| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | | | | | | | |
-| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | | | | | | | |
-| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | | | | | | | |
-| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | | | | | | | |
-| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|
+| `createOrder(symbol, type, side, amount, price?, params?)` | Place any order type | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createLimitOrder(symbol, side, amount, price)` | Limit order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `createMarketOrder(symbol, side, amount)` | Market order shortcut | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ |
+| `cancelOrder(id, symbol)` | Cancel single order | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `cancelAllOrders(symbol)` | Cancel all open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | |
+| `amendOrder(id, symbol, params)` | Modify existing order | ✅ | ✅ | ✅ | | | | | | | | | | | | | | |
+| `createOCO(symbol, side, qty, price, stopPrice)` | One-Cancels-Other | ✅ | | | | | | | | | | | | | | | | |
+| `createOTO(...)` | One-Triggers-Other | ✅ | | | | | | | | | | | | | | | | |
+| `createOTOCO(...)` | One-Triggers-OCO | ✅ | | | | | | | | | | | | | | | | |
+| `testOrder(...)` | Validate without placing | ✅ | | | | | | | | | | | | | | | | |
 
 ### Account (Private — Signed)
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|
-| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
-| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ |
-| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | | ✅ |
-| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | | | ❌ |
-| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | | | | | | | |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|
+| `fetchBalance()` | Account balances (free, used, total) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `fetchOrder(id, symbol)` | Single order status | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `fetchOpenOrders(symbol?)` | All open orders | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ |
+| `fetchClosedOrders(symbol, ...)` | Closed order history | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ❌ |
+| `fetchMyTrades(symbol, ...)` | Trade history with fees | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | | ✅ | ❌ |
+| `fetchTradingFees(symbol)` | Maker/taker fee rates | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | | | ❌ | ❌ |
+| `fetchCommission(symbol)` | Maker/taker commission rates | ✅ | | | | | | | | | | | | | | | | |
 
 ### WebSocket Streams
 
-| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex |
-|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|
-| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | | | | | | | |
-| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | | | | | | | |
-| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | | ❌ |
-| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | ❌ |
+| Method | Description | Binance | Bybit | OKX | Kraken | Gate.io | KuCoin | Coinbase | Bitfinex | Bitstamp | Bittrex | LBank | Phemex | BitMart | Bitrue | Bitforex | Pionex | Bibox |
+|--------|-------------|---------|-------|-----|--------|---------|--------|----------|----------|----------|---------|-------|--------|---------|--------|----------|--------|-------|
+| `watchTicker(symbol, callback)` | Real-time ticker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `watchAllTickers(callback)` | All tickers stream | ✅ | | | | | | | | | | | | | | | | |
+| `watchOrderBook(symbol, callback, levels?)` | Real-time order book | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `watchTrades(symbol, callback)` | Real-time trades | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| `watchKlines(symbol, interval, callback)` | Real-time candlesticks | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ |
+| `watchBookTicker(symbol, callback)` | Real-time best bid/ask | ✅ | | | | | | | | | | | | | | | | |
+| `watchBalance(callback)` | Balance updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | | ❌ | ❌ |
+| `watchOrders(callback)` | Order updates (private) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | | | | | | | ❌ | ❌ |
 
 ## Unified Response Formats
 
@@ -1273,7 +1338,7 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank, Phemex, BitMart, Bitrue, Bitforex, Pionex } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank, Phemex, BitMart, Bitrue, Bitforex, Pionex, Bibox } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
@@ -1292,8 +1357,9 @@ ygcc/
 │   ├── bitrue.js               # Bitrue Spot implementation (600 lines, 42 methods)
 │   ├── bitforex.js             # Bitforex Spot implementation (500 lines, 35 methods)
 │   ├── pionex.js               # Pionex — HMAC-SHA256 header-signing, DELETE with JSON body
+│   ├── bibox.js                # Bibox — dual V3 HmacMD5 + V4 HmacSHA256, zlib WS, limit orders only
 │   └── utils/
-│       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 + MD5 + Base64-decoded + memo + path signing
+│       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 + MD5 + HmacMD5 + Base64-decoded + memo + path signing
 │       ├── errors.js           # Typed error classes
 │       ├── helpers.js          # Safe value extraction, query builders
 │       ├── throttler.js        # Token-bucket rate limiter
@@ -1318,7 +1384,8 @@ ygcc/
     ├── bitmart.test.js         # 108 tests — BitMart Spot implementation
     ├── bitrue.test.js          # 108 tests — Bitrue Spot implementation
     ├── bitforex.test.js        # 101 tests — Bitforex Spot implementation
-    └── pionex.test.js          # 101 tests — Pionex implementation
+    ├── pionex.test.js          # 101 tests — Pionex implementation
+    └── bibox.test.js           # 98 tests — Bibox dual-auth implementation
 ```
 
 ## Adding a New Exchange
@@ -1585,8 +1652,24 @@ npm test
 ▶ WebSocket — server PING/client PONG (12 tests)
 ▶ WS Message Dispatch + Parsers (6 tests)
 ▶ Pionex Version (1 test)
+▶ Module Exports — Bibox (3 tests)
+▶ Bibox Constructor (8 tests)
+▶ Authentication — Dual V3 HmacMD5 + V4 HmacSHA256 (12 tests)
+▶ Bibox Response Handling (5 tests)
+▶ Bibox Parsers (8 tests)
+▶ Bibox Helper Methods (7 tests)
+▶ Bibox Error Mapping (8 tests)
+▶ Bibox HTTP Error Handling (6 tests)
+▶ Bibox Rate Limit Handling (3 tests)
+▶ Bibox Mocked API Calls (8 tests)
+▶ Bibox Market Lookup (3 tests)
+▶ Bibox vs Others Differences (8 tests)
+▶ Crypto — hmacMD5 + hmacSHA256 for Bibox (4 tests)
+▶ WebSocket — client PING + zlib decompression (10 tests)
+▶ Bibox WS Parsers (4 tests)
+▶ Bibox Version (1 test)
 
-1539 passing
+1637 passing
 ```
 
 ## Roadmap
@@ -1607,6 +1690,7 @@ npm test
 - [x] Bitrue Spot — Full REST + WebSocket (42 methods, HMAC-SHA256+URL-signature, gzip compressed WS, GTT timeInForce)
 - [x] Bitforex Spot — Full REST + WebSocket (35 methods, HMAC-SHA256+path-signing, coin-quote-base symbols, limit orders only, plain text WS)
 - [x] **Pionex** — HMAC-SHA256 header-signing, DELETE with JSON body, no REST market data, server PING/client PONG WS
+- [x] **Bibox** — Dual V3 HmacMD5 + V4 HmacSHA256, zlib compressed WS, limit orders only, numeric order_side
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
 - [ ] npm publish
