@@ -1,7 +1,7 @@
 {
   "name": "@ygcc/ygcc",
   "version": "2.9.0",
-  "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 40+ exchanges",
+  "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 30+ exchanges",
   "main": "index.js",
   "files": [
     "lib/",

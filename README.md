@@ -4,15 +4,15 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-2806%20passing-brightgreen)](tests/)
-[![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
+[![Exchanges](https://img.shields.io/badge/Exchanges-33-orange)](https://github.com/yuzgecoguz/ygcc)
 
-> Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
+> Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 33 exchanges.
 
 ## Overview
 
 **YGCC** is a JavaScript library for cryptocurrency trading that provides a unified API across multiple exchanges. Write your trading logic once — it works on every supported exchange without modification.
 
-Built from **5+ years of production trading experience** across 40+ exchanges.
+Built from **5+ years of production trading experience** across 30+ exchanges.
 
 ## Features
 
@@ -40,45 +40,35 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 7 | [KuCoin](https://www.kucoin.com) | `kucoin` | ✅ | ✅ | **Ready** |
 | 8 | [Bitfinex](https://www.bitfinex.com) | `bitfinex` | ✅ | ✅ | **Ready** |
 | 9 | [Bitstamp](https://www.bitstamp.net) | `bitstamp` | ✅ | ✅ | **Ready** |
-| 10 | [Gemini](https://www.gemini.com) | `gemini` | 🔜 | 🔜 | Planned |
-| 11 | [Crypto.com](https://crypto.com) | `cryptocom` | 🔜 | 🔜 | Planned |
-| 12 | [Bittrex](https://bittrex.com) | `bittrex` | ✅ | ✅ | **Ready** |
-| 13 | [Bitrue](https://www.bitrue.com) | `bitrue` | ✅ | ✅ | **Ready** |
-| 14 | [LBANK](https://www.lbank.com) | `lbank` | ✅ | ✅ | **Ready** |
-| 15 | [BitMart](https://www.bitmart.com) | `bitmart` | ✅ | ✅ | **Ready** |
-| 16 | [Bitforex](https://www.bitforex.com) | `bitforex` | ✅ | ✅ | **Ready** |
-| 17 | [Phemex](https://phemex.com) | `phemex` | ✅ | ✅ | **Ready** |
-| 18 | [Pionex](https://www.pionex.com) | `pionex` | ✅ | ✅ | **Ready** |
-| 19 | [Bibox](https://www.bibox.com) | `bibox` | ✅ | ✅ | **Ready** |
-| 20 | [WhiteBit](https://whitebit.com) | `whitebit` | ✅ | ✅ | **Ready** |
-| 21 | [VALR](https://www.valr.com) | `valr` | ✅ | ✅ | **Ready** |
-| 22 | [Bitexen](https://www.bitexen.com) | `bitexen` | ✅ | ✅ | **Ready** |
-| 23 | [BtcTurk](https://www.btcturk.com) | `btcturk` | ✅ | ✅ | **Ready** |
-| 24 | [BTSE](https://www.btse.com) | `btse` | ✅ | ✅ | **Ready** |
-| 25 | [EXMO](https://exmo.com) | `exmo` | ✅ | ✅ | **Ready** |
-| 26 | [CoinTR](https://www.cointr.com) | `cointr` | ✅ | ✅ | **Ready** |
-| 27 | [Coinzix](https://coinzix.com) | `coinzix` | 🔜 | 🔜 | Planned |
-| 28 | [DigiFinex](https://www.digifinex.com) | `digifinex` | 🔜 | 🔜 | Planned |
-| 29 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | ✅ | ✅ | **Ready** |
-| 30 | [iCrypex](https://icrypex.com) | `icrypex` | ✅ | ✅ | **Ready** |
-| 31 | [JBEX](https://www.jbex.com) | `jbex` | ✅ | ✅ | **Ready** |
-| 32 | [Kuna](https://kuna.io) | `kuna` | 🔜 | 🔜 | Planned |
-| 33 | [Narkasa](https://www.narkasa.com) | `narkasa` | 🔜 | 🔜 | Planned |
-| 34 | [NovaDax](https://www.novadax.com) | `novadax` | 🔜 | 🔜 | Planned |
-| 35 | [PointPay](https://pointpay.io) | `pointpay` | ✅ | ✅ | **Ready** |
-| 36 | [QMall](https://qmall.io) | `qmall` | 🔜 | 🔜 | Planned |
-| 37 | [TruBit](https://www.trubit.com) | `trubit` | ✅ | ✅ | **Ready** |
-| 38 | [TradeOgre](https://tradeogre.com) | `tradeogre` | ✅ | ❌ | **Ready** |
-| 39 | [TIDEX](https://tidex.com) | `tidex` | 🔜 | 🔜 | Planned |
-| 40 | [Latoken](https://latoken.com) | `latoken` | 🔜 | 🔜 | Planned |
-| 41 | [Polymarket](https://polymarket.com) | `polymarket` | 🔜 | 🔜 | Planned |
+| 10 | [Bittrex](https://bittrex.com) | `bittrex` | ✅ | ✅ | **Ready** |
+| 11 | [Bitrue](https://www.bitrue.com) | `bitrue` | ✅ | ✅ | **Ready** |
+| 12 | [LBANK](https://www.lbank.com) | `lbank` | ✅ | ✅ | **Ready** |
+| 13 | [BitMart](https://www.bitmart.com) | `bitmart` | ✅ | ✅ | **Ready** |
+| 14 | [Bitforex](https://www.bitforex.com) | `bitforex` | ✅ | ✅ | **Ready** |
+| 15 | [Phemex](https://phemex.com) | `phemex` | ✅ | ✅ | **Ready** |
+| 16 | [Pionex](https://www.pionex.com) | `pionex` | ✅ | ✅ | **Ready** |
+| 17 | [Bibox](https://www.bibox.com) | `bibox` | ✅ | ✅ | **Ready** |
+| 18 | [WhiteBit](https://whitebit.com) | `whitebit` | ✅ | ✅ | **Ready** |
+| 19 | [VALR](https://www.valr.com) | `valr` | ✅ | ✅ | **Ready** |
+| 20 | [Bitexen](https://www.bitexen.com) | `bitexen` | ✅ | ✅ | **Ready** |
+| 21 | [BtcTurk](https://www.btcturk.com) | `btcturk` | ✅ | ✅ | **Ready** |
+| 22 | [BTSE](https://www.btse.com) | `btse` | ✅ | ✅ | **Ready** |
+| 23 | [EXMO](https://exmo.com) | `exmo` | ✅ | ✅ | **Ready** |
+| 24 | [CoinTR](https://www.cointr.com) | `cointr` | ✅ | ✅ | **Ready** |
+| 25 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | ✅ | ✅ | **Ready** |
+| 26 | [iCrypex](https://icrypex.com) | `icrypex` | ✅ | ✅ | **Ready** |
+| 27 | [JBEX](https://www.jbex.com) | `jbex` | ✅ | ✅ | **Ready** |
+| 28 | [PointPay](https://pointpay.io) | `pointpay` | ✅ | ✅ | **Ready** |
+| 29 | [TruBit](https://www.trubit.com) | `trubit` | ✅ | ✅ | **Ready** |
+| 30 | [TradeOgre](https://tradeogre.com) | `tradeogre` | ✅ | ❌ | **Ready** |
 
 ### DEX (Decentralized)
 
 | # | Exchange | ID | REST | WebSocket | Status |
 |---|----------|-----|------|-----------|--------|
-| 41 | [Hyperliquid](https://hyperliquid.xyz) | `hyperliquid` | 🔜 | 🔜 | Planned |
-| 42 | [ZKLighter](https://zklighter.com) | `zklighter` | 🔜 | 🔜 | Planned |
+| 31 | [Pollymarket](https://pollymarket.com) | `pollymarket` | 🔜 | 🔜 | Planned |
+| 32 | [Hyperliquid](https://hyperliquid.xyz) | `hyperliquid` | 🔜 | 🔜 | Planned |
+| 33 | [ZKLighter](https://zklighter.com) | `zklighter` | 🔜 | 🔜 | Planned |
 
 > ✅ = Implemented &nbsp;&nbsp; 🔜 = Coming Soon
 
