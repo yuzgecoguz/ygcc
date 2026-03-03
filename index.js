@@ -24,6 +24,12 @@ const BtcTurk = require('./lib/btcturk');
 const Btse = require('./lib/btse');
 const Exmo = require('./lib/exmo');
 const Cointr = require('./lib/cointr');
+const HotCoin = require('./lib/hotcoin');
+const Icrypex = require('./lib/icrypex');
+const Jbex = require('./lib/jbex');
+const PointPay = require('./lib/pointpay');
+const Trubit = require('./lib/trubit');
+const TradeOgre = require('./lib/tradeogre');
 const BaseExchange = require('./lib/BaseExchange');
 
 // Error classes
@@ -84,6 +90,18 @@ module.exports = {
   exmo: Exmo,         // lowercase alias (CCXT-style)
   Cointr,
   cointr: Cointr,     // lowercase alias (CCXT-style)
+  HotCoin,
+  hotcoin: HotCoin,   // lowercase alias (CCXT-style)
+  Icrypex,
+  icrypex: Icrypex,   // lowercase alias (CCXT-style)
+  Jbex,
+  jbex: Jbex,         // lowercase alias (CCXT-style)
+  PointPay,
+  pointpay: PointPay, // lowercase alias (CCXT-style)
+  Trubit,
+  trubit: Trubit,     // lowercase alias (CCXT-style)
+  TradeOgre,
+  tradeogre: TradeOgre, // lowercase alias (CCXT-style)
 
   // Base class (for extending)
   BaseExchange,
@@ -107,8 +125,8 @@ module.exports = {
   WsClient,
 
   // Exchange list
-  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox', 'whitebit', 'valr', 'bitexen', 'btcturk', 'btse', 'exmo', 'cointr'],
+  exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox', 'whitebit', 'valr', 'bitexen', 'btcturk', 'btse', 'exmo', 'cointr', 'hotcoin', 'icrypex', 'jbex', 'pointpay', 'trubit', 'tradeogre'],
 
   // Version
-  version: '2.8.0',
+  version: '2.9.0',
 };

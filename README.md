@@ -1,9 +1,9 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v2.8.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/badge/npm-v2.9.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-2305%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-2806%20passing-brightgreen)](tests/)
 [![Exchanges](https://img.shields.io/badge/Exchanges-42-orange)](https://github.com/yuzgecoguz/ygcc)
 
 > Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 42 exchanges.
@@ -22,7 +22,7 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 - **Auto-Reconnect WebSocket** — Exponential backoff with jitter, automatic resubscription
 - **Typed Error Hierarchy** — `AuthenticationError`, `InsufficientFunds`, `RateLimitExceeded`, etc.
 - **Minimal Dependencies** — Only [`ws`](https://github.com/websockets/ws) for WebSocket support
-- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex), dual V3 HmacMD5 + V4 HmacSHA256 (Bibox), Base64+HMAC-SHA512 (WhiteBit), HMAC-SHA512 timestamp+method+path (VALR), HMAC-SHA256 uppercase 4-credential (Bitexen), Base64-decoded HMAC-SHA256 (BtcTurk), HMAC-SHA384 path-signing (BTSE), HMAC-SHA512 form-encoded (EXMO), double-layer HMAC-SHA256 (CoinTR)
+- **Multi-Auth Support** — HMAC-SHA256/384/512 (hex, Base64), SHA512 content hash (Kraken/Gate.io/Bittrex), JWT/ES256 (Coinbase), UUID nonce (Bitstamp), MD5+HMAC-SHA256 (LBank), Base64-decoded HMAC-SHA256 (Phemex), HMAC-SHA256+memo (BitMart), HMAC-SHA256+URL-signature (Bitrue), HMAC-SHA256+path-signing (Bitforex), HMAC-SHA256+header-signing (Pionex), dual V3 HmacMD5 + V4 HmacSHA256 (Bibox), Base64+HMAC-SHA512 (WhiteBit), HMAC-SHA512 timestamp+method+path (VALR), HMAC-SHA256 uppercase 4-credential (Bitexen), Base64-decoded HMAC-SHA256 (BtcTurk), HMAC-SHA384 path-signing (BTSE), HMAC-SHA512 form-encoded (EXMO), double-layer HMAC-SHA256 (CoinTR), Huobi-style query-string HMAC-SHA256 Base64 (HotCoin), Base64-decoded HMAC-SHA256 ICX headers (iCrypex), Binance-compatible HMAC-SHA256 (JBEX/Trubit), HMAC-SHA512 payload-based (PointPay), HTTP Basic Auth (TradeOgre)
 - **Testnet Support** — Built-in sandbox mode for safe testing
 
 ## Supported Exchanges
@@ -59,16 +59,16 @@ Built from **5+ years of production trading experience** across 40+ exchanges.
 | 26 | [CoinTR](https://www.cointr.com) | `cointr` | ✅ | ✅ | **Ready** |
 | 27 | [Coinzix](https://coinzix.com) | `coinzix` | 🔜 | 🔜 | Planned |
 | 28 | [DigiFinex](https://www.digifinex.com) | `digifinex` | 🔜 | 🔜 | Planned |
-| 29 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | 🔜 | 🔜 | Planned |
-| 30 | [iCrypex](https://icrypex.com) | `icrypex` | 🔜 | 🔜 | Planned |
-| 31 | [JBEX](https://www.jbex.com) | `jbex` | 🔜 | 🔜 | Planned |
+| 29 | [HotCoin](https://www.hotcoin.com) | `hotcoin` | ✅ | ✅ | **Ready** |
+| 30 | [iCrypex](https://icrypex.com) | `icrypex` | ✅ | ✅ | **Ready** |
+| 31 | [JBEX](https://www.jbex.com) | `jbex` | ✅ | ✅ | **Ready** |
 | 32 | [Kuna](https://kuna.io) | `kuna` | 🔜 | 🔜 | Planned |
 | 33 | [Narkasa](https://www.narkasa.com) | `narkasa` | 🔜 | 🔜 | Planned |
 | 34 | [NovaDax](https://www.novadax.com) | `novadax` | 🔜 | 🔜 | Planned |
-| 35 | [PointPay](https://pointpay.io) | `pointpay` | 🔜 | 🔜 | Planned |
+| 35 | [PointPay](https://pointpay.io) | `pointpay` | ✅ | ✅ | **Ready** |
 | 36 | [QMall](https://qmall.io) | `qmall` | 🔜 | 🔜 | Planned |
-| 37 | [TruBit](https://www.trubit.com) | `trubit` | 🔜 | 🔜 | Planned |
-| 38 | [TradeOgre](https://tradeogre.com) | `tradeogre` | 🔜 | 🔜 | Planned |
+| 37 | [TruBit](https://www.trubit.com) | `trubit` | ✅ | ✅ | **Ready** |
+| 38 | [TradeOgre](https://tradeogre.com) | `tradeogre` | ✅ | ❌ | **Ready** |
 | 39 | [TIDEX](https://tidex.com) | `tidex` | 🔜 | 🔜 | Planned |
 | 40 | [Latoken](https://latoken.com) | `latoken` | 🔜 | 🔜 | Planned |
 | 41 | [Polymarket](https://polymarket.com) | `polymarket` | 🔜 | 🔜 | Planned |
@@ -1700,7 +1700,7 @@ Binance uses a **weight-based** system (6000 weight/minute). Each endpoint has a
 
 ```
 ygcc/
-├── index.js                    # Entry point: const { Binance, Bybit, Okx, Kraken, Gateio, KuCoin, Coinbase, Bitfinex, Bitstamp, Bittrex, LBank, Phemex, BitMart, Bitrue, Bitforex, Pionex, Bibox, WhiteBit, Valr, Bitexen, BtcTurk, Btse, Exmo, Cointr } = require('@ygcc/ygcc')
+├── index.js                    # Entry point: const { Binance, Bybit, Okx, ..., HotCoin, Icrypex, Jbex, PointPay, Trubit, TradeOgre } = require('@ygcc/ygcc')
 ├── lib/
 │   ├── BaseExchange.js         # Abstract base class — unified interface
 │   ├── binance.js              # Binance implementation (1369 lines, 59 methods)
@@ -1727,6 +1727,12 @@ ygcc/
 │   ├── btse.js                 # BTSE exchange
 │   ├── exmo.js                 # EXMO exchange
 │   ├── cointr.js               # CoinTR exchange
+│   ├── hotcoin.js              # HotCoin — Huobi-style query-string HMAC-SHA256 Base64, GZIP WS
+│   ├── icrypex.js              # iCrypex — Base64-decoded HMAC-SHA256, ICX headers, pipe-delimited WS
+│   ├── jbex.js                 # JBEX — Binance-compatible HMAC-SHA256, Galactic-Tech white-label
+│   ├── pointpay.js             # PointPay — HMAC-SHA512 payload-based, all private POST
+│   ├── trubit.js               # Trubit — Binance-compatible, same platform as JBEX
+│   ├── tradeogre.js            # TradeOgre — HTTP Basic Auth, no WS, limit orders only
 │   └── utils/
 │       ├── crypto.js           # HMAC-SHA256/384/512 + JWT/ES256 + MD5 + HmacMD5 + Base64-decoded + memo + path + Base64 + uppercase signing
 │       ├── errors.js           # Typed error classes
@@ -1761,7 +1767,13 @@ ygcc/
     ├── btcturk.test.js         # 97 tests — BtcTurk tests (97 tests, 16 sections)
     ├── btse.test.js            # 94 tests — BTSE tests (94 tests, 16 sections)
     ├── exmo.test.js            # 93 tests — EXMO tests (93 tests, 16 sections)
-    └── cointr.test.js          # 92 tests — CoinTR tests (92 tests, 16 sections)
+    ├── cointr.test.js          # 92 tests — CoinTR tests (92 tests, 16 sections)
+    ├── hotcoin.test.js         # 95 tests — HotCoin tests (16 sections)
+    ├── icrypex.test.js         # 95 tests — iCrypex tests (16 sections)
+    ├── jbex.test.js            # 93 tests — JBEX tests (16 sections)
+    ├── pointpay.test.js        # 95 tests — PointPay tests (16 sections)
+    ├── trubit.test.js          # 93 tests — Trubit tests (16 sections)
+    └── tradeogre.test.js       # 91 tests — TradeOgre tests (15 sections, no WS)
 ```
 
 ## Adding a New Exchange
@@ -2186,6 +2198,12 @@ npm test
 - [x] **BTSE** — HMAC-SHA384, DELETE with JSON body, numeric order types
 - [x] **EXMO** — HMAC-SHA512, form-encoded POST, underscore symbols
 - [x] **CoinTR** — Double-layer HMAC-SHA256, auto-generated clOrdId, OKX-style API
+- [x] **HotCoin** — Huobi-style query-string HMAC-SHA256 Base64, GZIP compressed WS, auth in URL params
+- [x] **iCrypex** — Base64-decoded HMAC-SHA256, ICX headers, pipe-delimited WS protocol, TRY pairs
+- [x] **JBEX** — Binance-compatible HMAC-SHA256, X-BH-APIKEY header, Galactic-Tech white-label
+- [x] **PointPay** — HMAC-SHA512 payload-based signing, all private POST, base64-encoded body
+- [x] **Trubit** — Binance-compatible HMAC-SHA256, same platform as JBEX, MXN pairs
+- [x] **TradeOgre** — HTTP Basic Auth (simplest), separate buy/sell endpoints, no WebSocket, limit orders only
 - [ ] Futures/Margin support (Binance USDM, COINM)
 - [ ] TypeScript type definitions
 - [ ] npm publish

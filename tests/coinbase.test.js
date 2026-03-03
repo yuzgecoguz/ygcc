@@ -33,8 +33,8 @@ describe('Module Exports — Coinbase', () => {
     assert.ok(ygcc.exchanges.includes('coinbase'));
   });
 
-  it('version is 2.8.0', () => {
-    assert.strictEqual(ygcc.version, '2.8.0');
+  it('version is 2.9.0', () => {
+    assert.strictEqual(ygcc.version, '2.9.0');
   });
 });
 

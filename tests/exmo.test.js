@@ -773,7 +773,7 @@ describe('Exmo WS Parsers', () => {
 // 16. Version
 // ═══════════════════════════════════════════════════════════════
 describe('Exmo Version', () => {
-  it('library version is 2.8.0', () => {
-    assert.strictEqual(lib.version, '2.8.0');
+  it('library version is 2.9.0', () => {
+    assert.strictEqual(lib.version, '2.9.0');
   });
 });
