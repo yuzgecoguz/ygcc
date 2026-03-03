@@ -1,0 +1,16 @@
+- [Home](/)
+- [Supported Exchanges](exchanges.md)
+- **Getting Started**
+  - [Installation & Quick Start](quick-start.md)
+  - [Testnet / Sandbox](quick-start.md?id=testnet-sandbox-mode)
+- **API Reference**
+  - [Unified API](unified-api.md)
+  - [WebSocket Streams](websocket.md)
+  - [Response Formats](unified-api.md?id=unified-response-formats)
+- **Guides**
+  - [Authentication](authentication.md)
+  - [Error Handling](error-handling.md)
+  - [Rate Limiting](rate-limiting.md)
+- **Internals**
+  - [Architecture](architecture.md)
+  - [Adding a New Exchange](adding-exchange.md)
