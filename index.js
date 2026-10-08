@@ -128,5 +128,5 @@ module.exports = {
   exchanges: ['binance', 'bybit', 'okx', 'kraken', 'gateio', 'kucoin', 'coinbase', 'bitfinex', 'bitstamp', 'bittrex', 'lbank', 'phemex', 'bitmart', 'bitrue', 'bitforex', 'pionex', 'bibox', 'whitebit', 'valr', 'bitexen', 'btcturk', 'btse', 'exmo', 'cointr', 'hotcoin', 'icrypex', 'jbex', 'pointpay', 'trubit', 'tradeogre'],
 
   // Version
-  version: '2.9.0',
+  version: require('./package.json').version,
 };

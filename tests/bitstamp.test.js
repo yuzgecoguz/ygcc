@@ -877,7 +877,7 @@ describe('Bitstamp — Crypto (hmacSHA256)', () => {
 // =============================================================================
 
 describe('Bitstamp — Version', () => {
-  it('library version is 2.9.0', () => {
-    assert.strictEqual(ygcc.version, '2.9.0');
+  it('library version matches package.json', () => {
+    assert.strictEqual(ygcc.version, require('../package.json').version);
   });
 });

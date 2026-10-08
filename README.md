@@ -1,6 +1,6 @@
 # YGCC — Cryptocurrency Exchange Library
 
-[![npm version](https://img.shields.io/badge/npm-v2.9.0-blue)](https://www.npmjs.com/package/@ygcc/ygcc)
+[![npm version](https://img.shields.io/npm/v/@ygcc/ygcc)](https://www.npmjs.com/package/@ygcc/ygcc)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-2806%20passing-brightgreen)](tests/)

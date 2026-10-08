@@ -661,7 +661,7 @@ describe('TradeOgre No WebSocket', () => {
 // 15. Version
 // ═══════════════════════════════════════════════════════════════
 describe('TradeOgre Version', () => {
-  it('library version is 2.9.0', () => {
-    assert.strictEqual(lib.version, '2.9.0');
+  it('library version matches package.json', () => {
+    assert.strictEqual(lib.version, require('../package.json').version);
   });
 });
