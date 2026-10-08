@@ -1,7 +1,7 @@
 {
   "name": "@ygcc/ygcc",
   "version": "2.9.0",
-  "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 30+ exchanges",
+  "description": "Lightweight cryptocurrency exchange library — unified REST & WebSocket API for 30 exchanges",
   "main": "index.js",
   "files": [
     "lib/",
@@ -37,7 +37,7 @@
     "crypto",
     "defi"
   ],
-  "author": "Oguzhan Yuzgec <breath6767@gmail.com>",
+  "author": "Oguzhan Yuzgec <yuzgecoguz67@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/yuzgecoguz/ygcc/issues"

@@ -4,9 +4,9 @@
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=nodedotjs)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-2806%20passing-brightgreen)](tests/)
-[![Exchanges](https://img.shields.io/badge/Exchanges-33-orange)](https://github.com/yuzgecoguz/ygcc)
+[![Exchanges](https://img.shields.io/badge/Exchanges-30-orange)](https://github.com/yuzgecoguz/ygcc)
 
-> Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 33 exchanges.
+> Lightweight, unified REST & WebSocket API for cryptocurrency exchanges. One interface, 30 exchanges.
 
 ## Overview
 
@@ -62,15 +62,19 @@ Built from **5+ years of production trading experience** across 30+ exchanges.
 | 29 | [TruBit](https://www.trubit.com) | `trubit` | ✅ | ✅ | **Ready** |
 | 30 | [TradeOgre](https://tradeogre.com) | `tradeogre` | ✅ | ❌ | **Ready** |
 
-### DEX (Decentralized)
+> ✅ = Implemented &nbsp;&nbsp; ❌ = Not offered by the exchange
 
-| # | Exchange | ID | REST | WebSocket | Status |
-|---|----------|-----|------|-----------|--------|
-| 31 | [Pollymarket](https://pollymarket.com) | `pollymarket` | 🔜 | 🔜 | Planned |
-| 32 | [Hyperliquid](https://hyperliquid.xyz) | `hyperliquid` | 🔜 | 🔜 | Planned |
-| 33 | [ZKLighter](https://zklighter.com) | `zklighter` | 🔜 | 🔜 | Planned |
+All 30 exchanges above are implemented and covered by the test suite.
 
-> ✅ = Implemented &nbsp;&nbsp; 🔜 = Coming Soon
+## Roadmap
+
+Not yet implemented — these are planned, not shipped:
+
+| Venue | Type | Status |
+|-------|------|--------|
+| [Hyperliquid](https://hyperliquid.xyz) | Perp DEX | Planned |
+| [Lighter](https://lighter.xyz) | Perp DEX | Planned |
+| [Polymarket](https://polymarket.com) | Prediction market | Planned |
 
 ## Installation
 
